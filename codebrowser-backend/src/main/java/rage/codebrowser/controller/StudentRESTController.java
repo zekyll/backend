@@ -90,7 +90,7 @@ public class StudentRESTController {
         return snapshotRepository.findOne(snapshotId).getFiles();
     }
 
-    @RequestMapping(value = {"student/{studentId}/course/{courseId}/exercise/{exerciseId}/snapshot/{snapshotId}/file/{snapshotFileId}", "students/{studentId}/courses/{courseId}/exercises/{exerciseId}/snapshots/{snapshotId}/files/{snapshotFileId}"})
+    @RequestMapping(value = {"student/{studentId}/course/{courseId}/exercise/{exerciseId}/snapshot/{snapshotId}/file/{snapshotFileId}", "students/{studentId}/courses/{courseId}/exercises/{exerciseId}/snapshots/{snapshotId}/files/{snapshotFileId}"}, produces = "text/plain")
     @ResponseBody
     public FileSystemResource getSnapshotFileContent(@PathVariable Long snapshotFileId) {
         SnapshotFile sf = snapshotFileRepository.findOne(snapshotFileId);
