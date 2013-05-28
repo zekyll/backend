@@ -9,7 +9,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.Temporal;
 
 @Entity
-public class Snapshot extends AbstractNamedPersistable {
+public class Snapshot extends AbstractNamedPersistable implements Comparable<Snapshot> {
 
     @JsonIgnore
     @ManyToOne
@@ -50,5 +50,10 @@ public class Snapshot extends AbstractNamedPersistable {
 
     public void setExerciseAnswer(ExerciseAnswer exerciseAnswer) {
         this.exerciseAnswer = exerciseAnswer;
+    }
+
+    @Override
+    public int compareTo(Snapshot o) {
+        return this.snapshotTime.compareTo(o.snapshotTime);
     }
 }
