@@ -114,7 +114,18 @@ public class StudentRESTController {
         return snapshotRepository.findOne(snapshotId).getFiles();
     }
 
-    @RequestMapping(value = {"student/{studentId}/course/{courseId}/exercise/{exerciseId}/snapshot/{snapshotId}/file/{snapshotFileId}", "students/{studentId}/courses/{courseId}/exercises/{exerciseId}/snapshots/{snapshotId}/files/{snapshotFileId}"}, produces = "text/plain")
+    @RequestMapping(value = {"student/{studentId}/course/{courseId}/exercise/{exerciseId}/snapshot/{snapshotId}/file/{snapshotFileId}", "students/{studentId}/courses/{courseId}/exercises/{exerciseId}/snapshots/{snapshotId}/files/{snapshotFileId}"})    
+    @ResponseBody
+    public SnapshotFile getSnapshotFile(@PathVariable Long snapshotFileId) {
+        SnapshotFile snapshotFile = snapshotFileRepository.findOne(snapshotFileId);
+        if (snapshotFile == null) {
+            throw new ResourceNotFoundException();
+        }
+        
+        return snapshotFile;
+    }    
+    
+    @RequestMapping(value = {"student/{studentId}/course/{courseId}/exercise/{exerciseId}/snapshot/{snapshotId}/file/{snapshotFileId}/content", "students/{studentId}/courses/{courseId}/exercises/{exerciseId}/snapshots/{snapshotId}/files/{snapshotFileId}/content"}, produces = "text/plain")
     @ResponseBody
     public FileSystemResource getSnapshotFileContent(@PathVariable Long snapshotFileId) {
         SnapshotFile snapshotFile = snapshotFileRepository.findOne(snapshotFileId);
