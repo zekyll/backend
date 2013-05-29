@@ -14,6 +14,14 @@ public class Course extends AbstractNamedPersistable {
     private List<Student> students;
     @OneToMany(mappedBy = "course")
     private List<Exercise> exercises;
+    
+    public void addExercise(Exercise exercise) {
+        if(getExercises().contains(exercise)) {
+            return;
+        }
+        
+        getExercises().add(exercise);
+    }
 
     public List<Exercise> getExercises() {
         return exercises;

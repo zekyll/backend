@@ -53,39 +53,63 @@ public class RepositoryInitService {
             }
         }
 
-
+        Exercise e = null;
+        ExerciseAnswer ea = null;
         Student s = new Student();
         s.setName("El Barto");
         s = studentRepository.save(s);
 
         Course c = new Course();
-        c.setName("oh-pe");
+        c.setName("ohpe");
         c = courseRepository.save(c);
 
-        Exercise e = new Exercise();
-        e.setName("Arvosana");
-        e = exerciseRepository.save(e);
-
-        c.getExercises().add(e);
-        e.setCourse(c);
-
-        s.getCourses().add(c);
         c.getStudents().add(s);
-
-        ExerciseAnswer ea = new ExerciseAnswer();
-        ea.setExercise(e);
-        ea.setStudent(s);
-        ea = eaRepository.save(ea);
-
+        s.getCourses().add(c);
 
         SimpleDateFormat snapshotDateFormat = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss_SSSSSS");
-        for (String location : Config.LOCATIONS.split(",")) {
+        int count = 0;
+        for (File dir : new File(Config.DATA_PATH).listFiles()) {
+            count++;
+            if (count > 1000) {
+                break;
+            }
+
+            String location = dir.getName();
             location = location.trim();
             Snapshot ss = new Snapshot();
             try {
                 ss.setSnapshotTime(snapshotDateFormat.parse(location));
             } catch (ParseException ex) {
                 Logger.getLogger(RepositoryInitService.class.getName()).log(Level.SEVERE, null, ex);
+            }
+
+
+            String exerciseName = getExerciseName(dir);
+            e = exerciseRepository.findByName(exerciseName);
+            if (e == null) {
+                e = new Exercise();
+                e.setName(exerciseName);
+
+                e = exerciseRepository.save(e);
+
+                c.addExercise(e);
+                e.setCourse(c);
+
+                e = exerciseRepository.save(e);
+                c = courseRepository.save(c);
+            } else {
+                c.addExercise(e);
+                e.setCourse(c);
+            }
+
+
+
+            ea = eaRepository.findByStudentAndExercise(s, e);
+            if (ea == null) {
+                ea = new ExerciseAnswer();
+                ea.setExercise(e);
+                ea.setStudent(s);
+                ea = eaRepository.save(ea);
             }
 
             ss.setName(location);
@@ -111,6 +135,7 @@ public class RepositoryInitService {
 
             }
 
+            ea = eaRepository.save(ea);
             ss = snapshotRepository.save(ss);
         }
 
@@ -142,5 +167,16 @@ public class RepositoryInitService {
                 addFiles(file, toList);
             }
         }
+    }
+
+    private String getExerciseName(File location) {
+        for (File file : location.listFiles()) {
+            String filename = file.getName();
+            if (filename.toLowerCase().contains("viikko")) {
+                return filename.substring(filename.indexOf("-") + 1);
+            }
+        }
+
+        return "NA";
     }
 }

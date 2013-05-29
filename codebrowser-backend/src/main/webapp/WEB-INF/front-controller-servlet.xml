@@ -9,10 +9,17 @@
                             http://www.springframework.org/schema/mvc/spring-mvc-3.2.xsd
                             http://www.springframework.org/schema/context
                             http://www.springframework.org/schema/context/spring-context-3.2.xsd">
+    
+    <bean id="conversionService" class="org.springframework.core.convert.support.DefaultConversionService"/>
 
-    <mvc:annotation-driven />
+    <!--<bean class="org.springframework.data.repository.support.DomainClassConverter">-->
+    <bean class="rage.codebrowser.converter.HttpDomainClassConverter">
+        <constructor-arg ref="conversionService"/>
+    </bean>
+    
+    <mvc:annotation-driven conversion-service="conversionService" />
     
     <context:component-scan base-package="rage.codebrowser" />
-    
+
     <import resource="database.xml" />
 </beans>

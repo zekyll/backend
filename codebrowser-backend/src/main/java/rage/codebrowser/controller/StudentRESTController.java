@@ -13,29 +13,16 @@ import rage.codebrowser.dto.Exercise;
 import rage.codebrowser.dto.Snapshot;
 import rage.codebrowser.dto.SnapshotFile;
 import rage.codebrowser.dto.Student;
-import rage.codebrowser.errors.ResourceNotFoundException;
-import rage.codebrowser.repository.CourseRepository;
 import rage.codebrowser.repository.ExerciseAnswerRepository;
-import rage.codebrowser.repository.ExerciseRepository;
-import rage.codebrowser.repository.SnapshotFileRepository;
-import rage.codebrowser.repository.SnapshotRepository;
 import rage.codebrowser.repository.StudentRepository;
 
 @Controller
 public class StudentRESTController {
 
     @Autowired
-    private CourseRepository courseRepository;
-    @Autowired
     private ExerciseAnswerRepository exerciseAnswerRepository;
     @Autowired
-    private ExerciseRepository exerciseRepository;
-    @Autowired
     private StudentRepository studentRepository;
-    @Autowired
-    private SnapshotRepository snapshotRepository;
-    @Autowired
-    private SnapshotFileRepository snapshotFileRepository;
 
     @RequestMapping(value = {"students"})
     @ResponseBody
@@ -45,53 +32,38 @@ public class StudentRESTController {
 
     @RequestMapping(value = {"student/{studentId}", "students/{studentId}"})
     @ResponseBody
-    public Student getStudent(@PathVariable Long studentId) {
-        Student student = studentRepository.findOne(studentId);
-        if (student == null) {
-            throw new ResourceNotFoundException();
-        }
-
+    public Student getStudent(@PathVariable("studentId") Student student) {
         return student;
     }
 
     @RequestMapping(value = {"student/{studentId}/courses", "students/{studentId}/courses"})
     @ResponseBody
-    public List<Course> getStudentCourses(@PathVariable Long studentId) {
-        return courseRepository.findAll();
+    public List<Course> getStudentCourses(@PathVariable("studentId") Student student) {
+        return student.getCourses();
     }
 
     @RequestMapping(value = {"student/{studentId}/course/{courseId}", "students/{studentId}/courses/{courseId}"})
     @ResponseBody
-    public Course getStudentCourse(@PathVariable Long studentId, @PathVariable Long courseId) {
-        Course course = courseRepository.findOne(courseId);
-        if (course == null) {
-            throw new ResourceNotFoundException();
-        }
-
+    public Course getStudentCourse(@PathVariable Long studentId, @PathVariable("courseId") Course course) {
         return course;
     }
 
     @RequestMapping(value = {"student/{studentId}/course/{courseId}/exercises", "students/{studentId}/courses/{courseId}/exercises"})
     @ResponseBody
-    public List<Exercise> getStudentCourseExercises(@PathVariable Long studentId, @PathVariable Long courseId) {
-        return courseRepository.findOne(courseId).getExercises();
+    public List<Exercise> getStudentCourseExercises(@PathVariable Long studentId, @PathVariable("courseId") Course course) {
+        return getStudentCourse(studentId, course).getExercises();
     }
 
     @RequestMapping(value = {"student/{studentId}/course/{courseId}/exercise/{exerciseId}", "students/{studentId}/courses/{courseId}/exercises/{exerciseId}"})
     @ResponseBody
-    public Exercise getExerciseAnswer(@PathVariable Long studentId, @PathVariable Long courseId, @PathVariable Long exerciseId) {
-        Exercise exercise = exerciseRepository.findOne(exerciseId);
-        if (exercise == null) {
-            throw new ResourceNotFoundException();
-        }
-
+    public Exercise getExerciseAnswer(@PathVariable Long studentId, @PathVariable Long courseId, @PathVariable("exerciseId") Exercise exercise) {
         return exercise;
     }
 
     @RequestMapping(value = {"student/{studentId}/course/{courseId}/exercise/{exerciseId}/snapshots", "students/{studentId}/courses/{courseId}/exercises/{exerciseId}/snapshots"})
     @ResponseBody
-    public List<Snapshot> getSnapshots(@PathVariable Long studentId, @PathVariable Long courseId, @PathVariable Long exerciseId) {
-        List<Snapshot> snapshots = exerciseAnswerRepository.findByStudentAndExercise(studentRepository.findOne(studentId), exerciseRepository.findOne(exerciseId)).getSnapshots();
+    public List<Snapshot> getSnapshots(@PathVariable("studentId") Student student, @PathVariable Long courseId, @PathVariable("exerciseId") Exercise exercise) {
+        List<Snapshot> snapshots = exerciseAnswerRepository.findByStudentAndExercise(student, exercise).getSnapshots();
         Collections.sort(snapshots);
 
         return snapshots;
@@ -99,40 +71,25 @@ public class StudentRESTController {
 
     @RequestMapping(value = {"student/{studentId}/course/{courseId}/exercise/{exerciseId}/snapshot/{snapshotId}", "students/{studentId}/courses/{courseId}/exercises/{exerciseId}/snapshots/{snapshotId}"})
     @ResponseBody
-    public Snapshot getSnapshot(@PathVariable Long snapshotId) {
-        Snapshot snapshot = snapshotRepository.findOne(snapshotId);
-        if (snapshot == null) {
-            throw new ResourceNotFoundException();
-        }
-
+    public Snapshot getSnapshot(@PathVariable("snapshotId") Snapshot snapshot) {
         return snapshot;
     }
 
     @RequestMapping(value = {"student/{studentId}/course/{courseId}/exercise/{exerciseId}/snapshot/{snapshotId}/files", "students/{studentId}/courses/{courseId}/exercises/{exerciseId}/snapshots/{snapshotId}/files"})
     @ResponseBody
-    public List<SnapshotFile> getSnapshotFiles(@PathVariable Long snapshotId) {
-        return snapshotRepository.findOne(snapshotId).getFiles();
+    public List<SnapshotFile> getSnapshotFiles(@PathVariable("snapshotId") Snapshot snapshot) {
+        return snapshot.getFiles();
     }
 
-    @RequestMapping(value = {"student/{studentId}/course/{courseId}/exercise/{exerciseId}/snapshot/{snapshotId}/file/{snapshotFileId}", "students/{studentId}/courses/{courseId}/exercises/{exerciseId}/snapshots/{snapshotId}/files/{snapshotFileId}"})    
+    @RequestMapping(value = {"student/{studentId}/course/{courseId}/exercise/{exerciseId}/snapshot/{snapshotId}/file/{snapshotFileId}", "students/{studentId}/courses/{courseId}/exercises/{exerciseId}/snapshots/{snapshotId}/files/{snapshotFileId}"})
     @ResponseBody
-    public SnapshotFile getSnapshotFile(@PathVariable Long snapshotFileId) {
-        SnapshotFile snapshotFile = snapshotFileRepository.findOne(snapshotFileId);
-        if (snapshotFile == null) {
-            throw new ResourceNotFoundException();
-        }
-        
+    public SnapshotFile getSnapshotFile(@PathVariable("snapshotFileId") SnapshotFile snapshotFile) {
         return snapshotFile;
-    }    
-    
+    }
+
     @RequestMapping(value = {"student/{studentId}/course/{courseId}/exercise/{exerciseId}/snapshot/{snapshotId}/file/{snapshotFileId}/content", "students/{studentId}/courses/{courseId}/exercises/{exerciseId}/snapshots/{snapshotId}/files/{snapshotFileId}/content"}, produces = "text/plain")
     @ResponseBody
-    public FileSystemResource getSnapshotFileContent(@PathVariable Long snapshotFileId) {
-        SnapshotFile snapshotFile = snapshotFileRepository.findOne(snapshotFileId);
-        if (snapshotFile == null) {
-            throw new ResourceNotFoundException();
-        }
-        
+    public FileSystemResource getSnapshotFileContent(@PathVariable("snapshotFileId") SnapshotFile snapshotFile) {
         return new FileSystemResource(snapshotFile.getFilepath());
     }
 }

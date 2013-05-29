@@ -12,10 +12,6 @@ import rage.codebrowser.dto.Snapshot;
 import rage.codebrowser.dto.Student;
 import rage.codebrowser.repository.CourseRepository;
 import rage.codebrowser.repository.ExerciseAnswerRepository;
-import rage.codebrowser.repository.ExerciseRepository;
-import rage.codebrowser.repository.SnapshotFileRepository;
-import rage.codebrowser.repository.SnapshotRepository;
-import rage.codebrowser.repository.StudentRepository;
 
 @Controller
 public class CourseRESTController {
@@ -24,14 +20,6 @@ public class CourseRESTController {
     private CourseRepository courseRepository;
     @Autowired
     private ExerciseAnswerRepository exerciseAnswerRepository;
-    @Autowired
-    private ExerciseRepository exerciseRepository;
-    @Autowired
-    private StudentRepository studentRepository;
-    @Autowired
-    private SnapshotRepository snapshotRepository;
-    @Autowired
-    private SnapshotFileRepository snapshotFileRepository;
 
     @RequestMapping(value = {"courses"})
     @ResponseBody
@@ -41,37 +29,37 @@ public class CourseRESTController {
 
     @RequestMapping(value = {"courses/{courseId}", "course/{courseId}"})
     @ResponseBody
-    public Course getCourse(@PathVariable Long courseId) {
-        return courseRepository.findOne(courseId);
+    public Course getCourse(@PathVariable("courseId") Course course) {
+        return course;
     }
 
     @RequestMapping(value = {"courses/{courseId}/exercises", "course/{courseId}/exercises"})
     @ResponseBody
-    public List<Exercise> getCourseExercises(@PathVariable Long courseId) {
-        return courseRepository.findOne(courseId).getExercises();
+    public List<Exercise> getCourseExercises(@PathVariable("courseId") Course course) {
+        return course.getExercises();
     }
 
     @RequestMapping(value = {"courses/{courseId}/exercises/{exerciseId}", "course/{courseId}/exercise/{exerciseId}"})
     @ResponseBody
-    public Exercise getCourseExercise(@PathVariable Long courseId, @PathVariable Long exerciseId) {
-        return exerciseRepository.findOne(exerciseId);
+    public Exercise getCourseExercise(@PathVariable Long courseId, @PathVariable("exerciseId") Exercise exercise) {
+        return exercise;
     }
 
     @RequestMapping(value = {"courses/{courseId}/students", "course/{courseId}/students"})
     @ResponseBody
-    public List<Student> getCourseStudents(@PathVariable Long courseId) {
-        return courseRepository.findOne(courseId).getStudents();
+    public List<Student> getCourseStudents(@PathVariable("courseId") Course course) {
+        return course.getStudents();
     }
 
     @RequestMapping(value = {"courses/{courseId}/students/{studentId}", "course/{courseId}/students/{studentId}"})
     @ResponseBody
-    public Student getCourseStudent(@PathVariable Long courseId, @PathVariable Long studentId) {
-        return studentRepository.findOne(studentId);
+    public Student getCourseStudent(@PathVariable Long courseId, @PathVariable("studentId") Student student) {
+        return student;
     }
 
     @RequestMapping(value = {"course/{courseId}/student/{studentId}/exercise/{exerciseId}/snapshots", "courses/{courseId}/students/{studentId}/exercises/{exerciseId}/snapshots"})
     @ResponseBody
-    public List<Snapshot> getStudentCourseSnapshots(@PathVariable Long studentId, @PathVariable Long courseId, @PathVariable Long exerciseId) {
-        return exerciseAnswerRepository.findByStudentAndExercise(studentRepository.findOne(studentId), exerciseRepository.findOne(exerciseId)).getSnapshots();
+    public List<Snapshot> getStudentCourseSnapshots(@PathVariable("studentId") Student student, @PathVariable Long courseId, @PathVariable("exerciseId") Exercise exercise) {
+        return exerciseAnswerRepository.findByStudentAndExercise(student, exercise).getSnapshots();
     }
 }
