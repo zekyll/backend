@@ -43,4 +43,12 @@ public class ExerciseAnswer extends AbstractPersistable<Long> implements Seriali
     public void setSnapshots(List<Snapshot> snapshots) {
         this.snapshots = snapshots;
     }
+
+    public void addSnapshot(Snapshot ss) {
+        if (getSnapshots().contains(ss)) {
+            return;
+        }
+
+        getSnapshots().add(ss);
+    }
 }
