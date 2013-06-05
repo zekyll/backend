@@ -73,6 +73,12 @@ public class StudentRESTController {
     @RequestMapping(value = {"student/{studentId}/course/{courseId}/exercise/{exerciseId}/snapshot/{snapshotId}", "students/{studentId}/courses/{courseId}/exercises/{exerciseId}/snapshots/{snapshotId}"})
     @ResponseBody
     public Snapshot getSnapshot(@PathVariable("snapshotId") Snapshot snapshot) {
+        Collections.sort(snapshot.getFiles(), new Comparator<SnapshotFile>() {
+            @Override
+            public int compare(SnapshotFile o1, SnapshotFile o2) {
+                return o1.getName().compareTo(o2.getName());
+            }
+        });
         return snapshot;
     }
 
@@ -86,6 +92,7 @@ public class StudentRESTController {
                 return o1.getName().compareTo(o2.getName());
             }
         });
+        
         return files;
     }
 

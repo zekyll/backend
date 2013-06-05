@@ -2,6 +2,8 @@ package rage.codebrowser.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.io.Serializable;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import javax.persistence.Entity;
 import javax.persistence.ManyToOne;
@@ -37,6 +39,24 @@ public class ExerciseAnswer extends AbstractPersistable<Long> implements Seriali
     }
 
     public List<Snapshot> getSnapshots() {
+        if (snapshots != null) {
+            Collections.sort(snapshots, new Comparator<Snapshot>() {
+                @Override
+                public int compare(Snapshot o1, Snapshot o2) {
+                    return o1.getSnapshotTime().compareTo(o2.getSnapshotTime());
+                }
+            });
+
+            for (Snapshot snapshot : snapshots) {
+                Collections.sort(snapshot.getFiles(), new Comparator<SnapshotFile>() {
+                    @Override
+                    public int compare(SnapshotFile o1, SnapshotFile o2) {
+                        return o1.getName().compareTo(o2.getName());
+                    }
+                });
+            }
+        }
+
         return snapshots;
     }
 

@@ -6,6 +6,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -59,7 +60,17 @@ public class RepositoryInitService {
         c = courseRepository.save(c);
 
         int studentCount = 0;
-        for (File studentDir : new File(Config.DATA_PATH).listFiles()) {
+
+        File[] studentDirs = new File(Config.DATA_PATH).listFiles();
+        Arrays.sort(studentDirs, new Comparator<File>() {
+            @Override
+            public int compare(File o1, File o2) {
+                return o1.getName().compareTo(o2.getName());
+            }
+        });
+
+
+        for (File studentDir : studentDirs) {
             if (!studentDir.isDirectory()) {
                 continue;
             }
@@ -84,7 +95,12 @@ public class RepositoryInitService {
             int count = 0;
 
             File[] snapshotDirs = studentDir.listFiles();
-            Arrays.sort(snapshotDirs);
+            Arrays.sort(snapshotDirs, new Comparator<File>() {
+                @Override
+                public int compare(File o1, File o2) {
+                    return o1.getName().compareTo(o2.getName());
+                }
+            });
 
             for (File studentsExerciseDir : snapshotDirs) {
                 if (!studentsExerciseDir.isDirectory()) {
@@ -154,8 +170,13 @@ public class RepositoryInitService {
                     System.out.println("*****************************");
                     System.out.println("*****************************");
                 }
-                
-                Collections.sort(javaFiles);
+
+                Collections.sort(javaFiles, new Comparator<File>() {
+                    @Override
+                    public int compare(File o1, File o2) {
+                        return o1.getName().compareTo(o2.getName());
+                    }
+                });
 
                 for (File file : javaFiles) {
                     String path = file.getAbsolutePath();
@@ -182,9 +203,7 @@ public class RepositoryInitService {
                 ea = eaRepository.save(ea);
             }
         }
-        
         c = courseRepository.save(c);
-
     }
 
     private List<File> listJavaFiles(File fromDir) {
