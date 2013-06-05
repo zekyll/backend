@@ -1,6 +1,7 @@
 package rage.codebrowser.controller;
 
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.FileSystemResource;
@@ -78,7 +79,14 @@ public class StudentRESTController {
     @RequestMapping(value = {"student/{studentId}/course/{courseId}/exercise/{exerciseId}/snapshot/{snapshotId}/files", "students/{studentId}/courses/{courseId}/exercises/{exerciseId}/snapshots/{snapshotId}/files"})
     @ResponseBody
     public List<SnapshotFile> getSnapshotFiles(@PathVariable("snapshotId") Snapshot snapshot) {
-        return snapshot.getFiles();
+        List<SnapshotFile> files = snapshot.getFiles();
+        Collections.sort(files, new Comparator<SnapshotFile>() {
+            @Override
+            public int compare(SnapshotFile o1, SnapshotFile o2) {
+                return o1.getName().compareTo(o2.getName());
+            }
+        });
+        return files;
     }
 
     @RequestMapping(value = {"student/{studentId}/course/{courseId}/exercise/{exerciseId}/snapshot/{snapshotId}/file/{snapshotFileId}", "students/{studentId}/courses/{courseId}/exercises/{exerciseId}/snapshots/{snapshotId}/files/{snapshotFileId}"})

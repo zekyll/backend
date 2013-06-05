@@ -15,7 +15,7 @@ public class Snapshot extends AbstractNamedPersistable implements Comparable<Sna
     @ManyToOne
     private ExerciseAnswer exerciseAnswer;
     private String type;
-    @Temporal(javax.persistence.TemporalType.TIME)
+    @Temporal(javax.persistence.TemporalType.TIMESTAMP)
     private Date snapshotTime;
     @OneToMany
     private List<SnapshotFile> files;

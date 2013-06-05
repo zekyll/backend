@@ -5,6 +5,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -41,8 +42,6 @@ public class RepositoryInitService {
     @Autowired
     private ExerciseAnswerRepository eaRepository;
 
-    // currently loading exactly one student for frontend implementation
-    // testing
     @PostConstruct
     @Transactional
     public void init() {
@@ -66,7 +65,7 @@ public class RepositoryInitService {
             }
 
             studentCount++;
-            if (studentCount > 5) {
+            if (studentCount > 4) {
                 break;
             }
 
@@ -155,6 +154,8 @@ public class RepositoryInitService {
                     System.out.println("*****************************");
                     System.out.println("*****************************");
                 }
+                
+                Collections.sort(javaFiles);
 
                 for (File file : javaFiles) {
                     String path = file.getAbsolutePath();
