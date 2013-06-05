@@ -2,7 +2,9 @@ package rage.codebrowser.controller;
 
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.stereotype.Controller;
@@ -11,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import rage.codebrowser.dto.Course;
 import rage.codebrowser.dto.Exercise;
+import rage.codebrowser.dto.ExerciseAnswer;
 import rage.codebrowser.dto.Snapshot;
 import rage.codebrowser.dto.SnapshotFile;
 import rage.codebrowser.dto.Student;
@@ -45,14 +48,24 @@ public class StudentRESTController {
 
     @RequestMapping(value = {"student/{studentId}/course/{courseId}", "students/{studentId}/courses/{courseId}"})
     @ResponseBody
-    public Course getStudentCourse(@PathVariable Long studentId, @PathVariable("courseId") Course course) {
+    public Course getStudentCourse(@PathVariable("studentId") Student student, @PathVariable("courseId") Course course) {
+        List<Exercise> exercises = course.getExercises();
+        
+        Set<Exercise> existingExercises = new HashSet<Exercise>();
+        List<ExerciseAnswer> answers = exerciseAnswerRepository.findByStudent(student);
+        for (ExerciseAnswer exerciseAnswer : answers) {
+            existingExercises.add(exerciseAnswer.getExercise());
+        }
+        
+        exercises.retainAll(existingExercises);
+        course.setExercises(exercises);
         return course;
     }
 
     @RequestMapping(value = {"student/{studentId}/course/{courseId}/exercises", "students/{studentId}/courses/{courseId}/exercises"})
     @ResponseBody
-    public List<Exercise> getStudentCourseExercises(@PathVariable Long studentId, @PathVariable("courseId") Course course) {
-        return getStudentCourse(studentId, course).getExercises();
+    public List<Exercise> getStudentCourseExercises(@PathVariable("studentId") Student student, @PathVariable("courseId") Course course) {
+        return getStudentCourse(student, course).getExercises();
     }
 
     @RequestMapping(value = {"student/{studentId}/course/{courseId}/exercise/{exerciseId}", "students/{studentId}/courses/{courseId}/exercises/{exerciseId}"})
