@@ -19,7 +19,7 @@ public class Snapshot extends AbstractNamedPersistable implements Comparable<Sna
     private Date snapshotTime;
     @OneToMany
     private List<SnapshotFile> files;
-
+    
     public String getType() {
         return type;
     }

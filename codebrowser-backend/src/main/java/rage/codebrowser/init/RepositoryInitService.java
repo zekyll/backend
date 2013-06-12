@@ -111,6 +111,12 @@ public class RepositoryInitService {
                 if (count > 2000) {
                     break;
                 }
+                
+                
+                List<File> javaFiles = listJavaFiles(studentsExerciseDir);
+                if(javaFiles.isEmpty()) {
+                    continue;
+                }
 
                 String location = studentsExerciseDir.getName();
                 location = location.trim();
@@ -160,7 +166,6 @@ public class RepositoryInitService {
 
 
                 File fileLocation = studentsExerciseDir;
-                List<File> javaFiles = listJavaFiles(fileLocation);
                 if (javaFiles.size() > 1) {
                     System.out.println("*****************************");
                     System.out.println("*****************************");

@@ -70,13 +70,23 @@ public class StudentRESTController {
 
     @RequestMapping(value = {"student/{studentId}/course/{courseId}/exercise/{exerciseId}", "students/{studentId}/courses/{courseId}/exercises/{exerciseId}"})
     @ResponseBody
-    public Exercise getExerciseAnswer(@PathVariable Long studentId, @PathVariable Long courseId, @PathVariable("exerciseId") Exercise exercise) {
+    public Exercise getExerciseAnswer(@PathVariable("studentId") Student student, @PathVariable("courseId") Course course, @PathVariable("exerciseId") Exercise exercise) {
+        List<Exercise> exercises = getStudentCourseExercises(student, course);
+        if(!exercises.contains(exercise)) {
+            return null;
+        }
+        
         return exercise;
     }
 
     @RequestMapping(value = {"student/{studentId}/course/{courseId}/exercise/{exerciseId}/snapshots", "students/{studentId}/courses/{courseId}/exercises/{exerciseId}/snapshots"})
     @ResponseBody
-    public List<Snapshot> getSnapshots(@PathVariable("studentId") Student student, @PathVariable Long courseId, @PathVariable("exerciseId") Exercise exercise) {
+    public List<Snapshot> getSnapshots(@PathVariable("studentId") Student student, @PathVariable("courseId") Course course, @PathVariable("exerciseId") Exercise exercise) {
+        List<Exercise> exercises = getStudentCourseExercises(student, course);
+        if(!exercises.contains(exercise)) {
+            return null;
+        }
+        
         List<Snapshot> snapshots = exerciseAnswerRepository.findByStudentAndExercise(student, exercise).getSnapshots();
         Collections.sort(snapshots);
 
