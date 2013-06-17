@@ -76,7 +76,7 @@ public class RepositoryInitService {
             }
 
             studentCount++;
-            if (studentCount > 4) {
+            if (studentCount > 3) {
                 break;
             }
 

@@ -7,6 +7,7 @@ import javax.persistence.Entity;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Temporal;
+import javax.persistence.Transient;
 
 @Entity
 public class Snapshot extends AbstractNamedPersistable implements Comparable<Snapshot> {
@@ -19,7 +20,11 @@ public class Snapshot extends AbstractNamedPersistable implements Comparable<Sna
     private Date snapshotTime;
     @OneToMany
     private List<SnapshotFile> files;
-    
+    @Transient
+    private Exercise exercise;
+    @Transient
+    private CourseInfo course;
+
     public String getType() {
         return type;
     }
@@ -50,6 +55,22 @@ public class Snapshot extends AbstractNamedPersistable implements Comparable<Sna
 
     public void setExerciseAnswer(ExerciseAnswer exerciseAnswer) {
         this.exerciseAnswer = exerciseAnswer;
+    }
+
+    public Exercise getExercise() {
+        return exercise;
+    }
+
+    public void setExercise(Exercise exercise) {
+        this.exercise = exercise;
+    }
+
+    public CourseInfo getCourse() {
+        return course;
+    }
+
+    public void setCourse(CourseInfo course) {
+        this.course = course;
     }
 
     @Override

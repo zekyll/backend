@@ -1,5 +1,6 @@
 package rage.codebrowser.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.io.Serializable;
 import javax.persistence.MappedSuperclass;
 import org.springframework.data.jpa.domain.AbstractPersistable;
@@ -15,5 +16,11 @@ public class AbstractNamedPersistable extends AbstractPersistable<Long> implemen
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    @Override
+    @JsonIgnore
+    public boolean isNew() {
+        return super.isNew();
     }
 }

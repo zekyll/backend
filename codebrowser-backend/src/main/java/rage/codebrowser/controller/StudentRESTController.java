@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import rage.codebrowser.dto.Course;
+import rage.codebrowser.dto.CourseInfo;
 import rage.codebrowser.dto.Exercise;
 import rage.codebrowser.dto.ExerciseAnswer;
 import rage.codebrowser.dto.Snapshot;
@@ -89,19 +90,25 @@ public class StudentRESTController {
         
         List<Snapshot> snapshots = exerciseAnswerRepository.findByStudentAndExercise(student, exercise).getSnapshots();
         Collections.sort(snapshots);
+        for (Snapshot snapshot : snapshots) {
+            snapshot.setExercise(exercise);
+            snapshot.setCourse(new CourseInfo(course.getId(), course.getName()));
+        }
 
         return snapshots;
     }
 
     @RequestMapping(value = {"student/{studentId}/course/{courseId}/exercise/{exerciseId}/snapshot/{snapshotId}", "students/{studentId}/courses/{courseId}/exercises/{exerciseId}/snapshots/{snapshotId}"})
     @ResponseBody
-    public Snapshot getSnapshot(@PathVariable("snapshotId") Snapshot snapshot) {
+    public Snapshot getSnapshot(@PathVariable("snapshotId") Snapshot snapshot, @PathVariable("courseId") Course course, @PathVariable("exerciseId") Exercise exercise) {
         Collections.sort(snapshot.getFiles(), new Comparator<SnapshotFile>() {
             @Override
             public int compare(SnapshotFile o1, SnapshotFile o2) {
                 return o1.getName().compareTo(o2.getName());
             }
         });
+        snapshot.setExercise(exercise);
+        snapshot.setCourse(new CourseInfo(course.getId(), course.getName()));
         return snapshot;
     }
 
