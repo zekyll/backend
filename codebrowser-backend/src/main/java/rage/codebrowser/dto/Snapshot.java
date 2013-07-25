@@ -1,7 +1,14 @@
 package rage.codebrowser.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import difflib.DiffUtils;
+import difflib.Patch;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 import javax.persistence.Entity;
 import javax.persistence.ManyToOne;
@@ -76,5 +83,65 @@ public class Snapshot extends AbstractNamedPersistable implements Comparable<Sna
     @Override
     public int compareTo(Snapshot o) {
         return this.snapshotTime.compareTo(o.snapshotTime);
+    }
+
+    public static List<Snapshot> filterSequentialUnalteredSnapshots(List<Snapshot> snapshots) {
+        if (snapshots == null || snapshots.size() <= 1) {
+            return snapshots;
+        }
+
+        List<Snapshot> filteredSnapshots = new ArrayList<Snapshot>();
+        filteredSnapshots.add(snapshots.get(0));
+
+        List<String> snapshotLines = filesToLines(snapshots.get(0).getFiles());
+
+        for (int i = 1; i < snapshots.size(); i++) {
+            Snapshot current = snapshots.get(i);
+            List<String> currentLines = filesToLines(current.getFiles());
+
+            Patch diff = DiffUtils.diff(snapshotLines, currentLines);
+            if (diff == null || diff.getDeltas() == null || diff.getDeltas().size() > 0) {
+                filteredSnapshots.add(current);
+            }
+
+            snapshotLines = currentLines;
+        }
+
+        return filteredSnapshots;
+    }
+
+    public static List<String> filesToLines(List<SnapshotFile> files) {
+        List<String> lines = new ArrayList<String>();
+        for (SnapshotFile file : files) {
+            lines.add(file.getFilepath());
+            lines.addAll(fileToLines(file.getFilepath()));
+        }
+
+        return lines;
+    }
+
+    public static List<String> fileToLines(String filename) {
+        List<String> lines = new LinkedList<String>();
+        String line;
+        BufferedReader in = null;
+        try {
+            in = new BufferedReader(new FileReader(filename));
+            while ((line = in.readLine()) != null) {
+                lines.add(line);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (in != null) {
+                try {
+
+                    in.close();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        return lines;
     }
 }

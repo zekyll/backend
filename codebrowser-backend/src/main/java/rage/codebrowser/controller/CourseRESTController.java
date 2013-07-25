@@ -1,6 +1,12 @@
 package rage.codebrowser.controller;
 
+import difflib.DiffUtils;
+import difflib.Patch;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -11,6 +17,7 @@ import rage.codebrowser.dto.Course;
 import rage.codebrowser.dto.Exercise;
 import rage.codebrowser.dto.ExerciseAnswer;
 import rage.codebrowser.dto.Snapshot;
+import rage.codebrowser.dto.SnapshotFile;
 import rage.codebrowser.dto.Student;
 import rage.codebrowser.repository.CourseRepository;
 import rage.codebrowser.repository.ExerciseAnswerRepository;
@@ -46,18 +53,18 @@ public class CourseRESTController {
     public Exercise getCourseExercise(@PathVariable Long courseId, @PathVariable("exerciseId") Exercise exercise) {
         return exercise;
     }
-    
+
     @RequestMapping(value = {"courses/{courseId}/exercises/{exerciseId}/students", "course/{courseId}/exercise/{exerciseId}/students"})
     @ResponseBody
     public List<Student> getStudentsThatWorkedOnExercise(@PathVariable("courseId") Course course, @PathVariable("exerciseId") Exercise exercise) {
         List<Student> studentsThatWorkedOnExercise = new ArrayList<Student>();
         for (Student student : course.getStudents()) {
             ExerciseAnswer answer = exerciseAnswerRepository.findByStudentAndExercise(student, exercise);
-            if(answer != null) {
+            if (answer != null) {
                 studentsThatWorkedOnExercise.add(student);
             }
         }
-        
+
         return studentsThatWorkedOnExercise;
     }
 
@@ -76,6 +83,7 @@ public class CourseRESTController {
     @RequestMapping(value = {"course/{courseId}/student/{studentId}/exercise/{exerciseId}/snapshots", "courses/{courseId}/students/{studentId}/exercises/{exerciseId}/snapshots"})
     @ResponseBody
     public List<Snapshot> getStudentCourseSnapshots(@PathVariable("studentId") Student student, @PathVariable Long courseId, @PathVariable("exerciseId") Exercise exercise) {
-        return exerciseAnswerRepository.findByStudentAndExercise(student, exercise).getSnapshots();
+        List<Snapshot> snapshots = exerciseAnswerRepository.findByStudentAndExercise(student, exercise).getSnapshots();
+        return Snapshot.filterSequentialUnalteredSnapshots(snapshots);
     }
 }

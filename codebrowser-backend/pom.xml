@@ -129,6 +129,13 @@
             <artifactId>jetty-servlets</artifactId>
             <version>8.1.10.v20130312</version>
         </dependency>
+        
+        <!-- diff tools -->
+        <dependency>
+            <groupId>com.googlecode.java-diff-utils</groupId>
+            <artifactId>diffutils</artifactId>
+            <version>1.2.1</version>
+        </dependency>
     </dependencies>
     
     <repositories>
