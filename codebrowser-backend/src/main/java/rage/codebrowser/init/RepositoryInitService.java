@@ -8,6 +8,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
@@ -46,22 +48,28 @@ public class RepositoryInitService {
     @PostConstruct
     @Transactional
     public void init() {
-        for (String dataPath : Config.POSSIBLE_DATA_PATHS) {
-            File dataLocation = new File(dataPath);
-            if (dataLocation.exists() && dataLocation.isDirectory() && dataLocation.canRead()) {
-                Config.DATA_PATH = dataPath;
-                break;
-            }
-        }
-
-
+//        for (String dataPath : Config.POSSIBLE_DATA_PATHS) {
+//            File dataLocation = new File(dataPath);
+//            if (dataLocation.exists() && dataLocation.isDirectory() && dataLocation.canRead()) {
+//                Config.DATA_PATH = dataPath;
+//                break;
+//            }
+//        }
+        
+        readInExercises("ohpe", 4, "/home/group/rage/MOOCDATA/s2012-ohpe/events-decompressed/", "Tietokanta", "Lyyrakortti");
+        readInExercises("ohja", 4, "/home/group/rage/MOOCDATA/s2012-ohja/events-decompressed/", "Matopeli", "Numerotiedustelu", "Sanakirja");      
+    }
+    
+    private void readInExercises(String courseName, int maxStudentsToConsider, String dataPath, String... exercisesToAccept) {
+        List<String> exerciseList = Arrays.asList(exercisesToAccept);
+        
         Course c = new Course();
-        c.setName("ohpe");
+        c.setName(courseName);
         c = courseRepository.save(c);
 
         int studentCount = 0;
 
-        File[] studentDirs = new File(Config.DATA_PATH).listFiles();
+        File[] studentDirs = new File(dataPath).listFiles();
         Arrays.sort(studentDirs, new Comparator<File>() {
             @Override
             public int compare(File o1, File o2) {
@@ -74,140 +82,157 @@ public class RepositoryInitService {
             if (!studentDir.isDirectory()) {
                 continue;
             }
-
-            studentCount++;
-            if (studentCount > 3) {
-                break;
+            
+            // find exercises that this student has worked on 
+            // 1. snapshots
+            File[] studentSnapshotDirs = studentDir.listFiles();
+            if(studentSnapshotDirs.length < 100) {
+                continue;
             }
-
-
-            Exercise e = null;
-            ExerciseAnswer ea = null;
-            Student s = new Student();
-            s.setName("student_" + studentDir.getName());
-            s = studentRepository.save(s);
-
-
-            c.getStudents().add(s);
-            s.getCourses().add(c);
-
-            SimpleDateFormat snapshotDateFormat = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss_SSSSSS");
-            int count = 0;
-
-            File[] snapshotDirs = studentDir.listFiles();
-            Arrays.sort(snapshotDirs, new Comparator<File>() {
+            
+            Arrays.sort(studentSnapshotDirs, new Comparator<File>() {
                 @Override
                 public int compare(File o1, File o2) {
                     return o1.getName().compareTo(o2.getName());
                 }
             });
-
-            for (File studentsExerciseDir : snapshotDirs) {
+            
+            int okSnapshots = 0;
+            // 2. exercises
+            Map<String, List<File>> snapshotDirs = new TreeMap<String, List<File>>();
+            for (File studentsExerciseDir : studentSnapshotDirs) {
                 if (!studentsExerciseDir.isDirectory()) {
                     continue;
                 }
-
-                count++;
-                if (count > 2000) {
-                    break;
-                }
                 
-                
-                List<File> javaFiles = listJavaFiles(studentsExerciseDir);
-                if(javaFiles.isEmpty()) {
-                    continue;
-                }
-
-                String location = studentsExerciseDir.getName();
-                location = location.trim();
-                Snapshot ss = new Snapshot();
-                try {
-                    ss.setSnapshotTime(snapshotDateFormat.parse(location));
-                } catch (ParseException ex) {
-                    Logger.getLogger(RepositoryInitService.class.getName()).log(Level.SEVERE, null, ex);
-                }
-
                 String exerciseName = getExerciseName(studentsExerciseDir);
-                if (!exerciseName.contains("Tietokanta") && !exerciseName.contains("Lyyrakortti")) {
-                    continue;
+                for (String acceptableExercises : exerciseList) {
+                    if(!exerciseName.contains(acceptableExercises)) {
+                        continue;
+                    }
+                }
+                
+                if(!snapshotDirs.containsKey(exerciseName)) {
+                    snapshotDirs.put(exerciseName, new ArrayList<File>());
+                }
+                
+                snapshotDirs.get(exerciseName).add(studentsExerciseDir);
+                okSnapshots++;
+            }
+            
+            if(snapshotDirs.size() < exercisesToAccept.length - 1 || okSnapshots < 50) {
+                continue;
+            }
+            
+            studentCount++;
+            if (studentCount > maxStudentsToConsider) {
+                break;
+            }
+
+            SimpleDateFormat snapshotDateFormat = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss_SSSSSS");
+            for (String exerciseName : snapshotDirs.keySet()) {
+                
+                Exercise e = null;
+                ExerciseAnswer ea = null;
+                Student s = new Student();
+                s.setName("student_" + studentDir.getName());
+                s = studentRepository.save(s);
+
+                c.getStudents().add(s);
+                s.getCourses().add(c);
+                
+                
+                for (File studentsExerciseDir : snapshotDirs.get(exerciseName)) {
+                    List<File> javaFiles = listJavaFiles(studentsExerciseDir);
+                    if (javaFiles.isEmpty()) {
+                        continue;
+                    }
+
+                    String location = studentsExerciseDir.getName();
+                    location = location.trim();
+                    Snapshot ss = new Snapshot();
+                    try {
+                        ss.setSnapshotTime(snapshotDateFormat.parse(location));
+                    } catch (ParseException ex) {
+                        Logger.getLogger(RepositoryInitService.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+
+                    e = exerciseRepository.findByName(exerciseName);
+                    if (e == null) {
+                        e = new Exercise();
+                        e.setName(exerciseName);
+
+                        e = exerciseRepository.save(e);
+
+                        c.addExercise(e);
+                        e.setCourse(c);
+
+                        e = exerciseRepository.save(e);
+                        c = courseRepository.save(c);
+                    } else {
+                        if (!c.getExercises().contains(e)) {
+                            c.addExercise(e);
+                        }
+                        
+                        if (!e.getCourse().equals(c)) {
+                            e.setCourse(c);
+                        }
+                    }
+
+                    ea = eaRepository.findByStudentAndExercise(s, e);
+                    if (ea == null) {
+                        ea = new ExerciseAnswer();
+                        ea.setExercise(e);
+                        ea.setStudent(s);
+                        ea = eaRepository.save(ea);
+                    }
+
+                    ss.setName(location);
+                    ss.setType("EVENT");
+                    ss.setExerciseAnswer(ea);
+
+                    ss = snapshotRepository.save(ss);
+                    ea.addSnapshot(ss);
+
+                    if (javaFiles.size() > 1) {
+                        System.out.println("*****************************");
+                        System.out.println("More than 1 file at " + studentsExerciseDir.getAbsolutePath());
+                        System.out.println("*****************************");
+                    }
+
+                    Collections.sort(javaFiles, new Comparator<File>() {
+                        @Override
+                        public int compare(File o1, File o2) {
+                            return o1.getName().compareTo(o2.getName());
+                        }
+                    });
+
+                    for (File file : javaFiles) {
+                        String path = file.getAbsolutePath();
+
+                        SnapshotFile sf = new SnapshotFile();
+                        sf.setName(file.getName());
+                        sf.setFilepath(path);
+
+                        sf = snapshotFileRepository.save(sf);
+
+                        ss.getFiles().add(sf);
+                    }
+
+                    ea = eaRepository.save(ea);
+                    ss = snapshotRepository.save(ss);
                 }
 
-                e = exerciseRepository.findByName(exerciseName);
-                if (e == null) {
-                    e = new Exercise();
-                    e.setName(exerciseName);
-
+                s = studentRepository.save(s);
+                if (e != null) {
                     e = exerciseRepository.save(e);
-
-                    c.addExercise(e);
-                    e.setCourse(c);
-
-                    e = exerciseRepository.save(e);
-                    c = courseRepository.save(c);
-                } else {
-                    c.addExercise(e);
-                    e.setCourse(c);
                 }
-
-                ea = eaRepository.findByStudentAndExercise(s, e);
-                if (ea == null) {
-                    ea = new ExerciseAnswer();
-                    ea.setExercise(e);
-                    ea.setStudent(s);
+                if (ea != null) {
                     ea = eaRepository.save(ea);
                 }
-
-                ss.setName(location);
-                ss.setType("EVENT");
-                ss.setExerciseAnswer(ea);
-
-                ss = snapshotRepository.save(ss);
-                ea.addSnapshot(ss);
-
-
-                File fileLocation = studentsExerciseDir;
-                if (javaFiles.size() > 1) {
-                    System.out.println("*****************************");
-                    System.out.println("*****************************");
-                    System.out.println("*****************************");
-                    System.out.println("More than 1 file at " + fileLocation.getAbsolutePath());
-                    System.out.println("*****************************");
-                    System.out.println("*****************************");
-                    System.out.println("*****************************");
-                }
-
-                Collections.sort(javaFiles, new Comparator<File>() {
-                    @Override
-                    public int compare(File o1, File o2) {
-                        return o1.getName().compareTo(o2.getName());
-                    }
-                });
-
-                for (File file : javaFiles) {
-                    String path = file.getAbsolutePath();
-
-                    SnapshotFile sf = new SnapshotFile();
-                    sf.setName(file.getName());
-                    sf.setFilepath(path);
-
-                    sf = snapshotFileRepository.save(sf);
-
-                    ss.getFiles().add(sf);
-                }
-
-                ea = eaRepository.save(ea);
-                ss = snapshotRepository.save(ss);
-            }
-
-
-            s = studentRepository.save(s);
-            if (e != null) {
-                e = exerciseRepository.save(e);
-            }
-            if (ea != null) {
-                ea = eaRepository.save(ea);
             }
         }
+        
         c = courseRepository.save(c);
     }
 
