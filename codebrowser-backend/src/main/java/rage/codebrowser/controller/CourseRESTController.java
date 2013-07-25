@@ -1,5 +1,6 @@
 package rage.codebrowser.controller;
 
+import java.util.ArrayList;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -8,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import rage.codebrowser.dto.Course;
 import rage.codebrowser.dto.Exercise;
+import rage.codebrowser.dto.ExerciseAnswer;
 import rage.codebrowser.dto.Snapshot;
 import rage.codebrowser.dto.Student;
 import rage.codebrowser.repository.CourseRepository;
@@ -43,6 +45,20 @@ public class CourseRESTController {
     @ResponseBody
     public Exercise getCourseExercise(@PathVariable Long courseId, @PathVariable("exerciseId") Exercise exercise) {
         return exercise;
+    }
+    
+    @RequestMapping(value = {"courses/{courseId}/exercises/{exerciseId}/students", "course/{courseId}/exercise/{exerciseId}/students"})
+    @ResponseBody
+    public List<Student> getStudentsThatWorkedOnExercise(@PathVariable("courseId") Course course, @PathVariable("exerciseId") Exercise exercise) {
+        List<Student> studentsThatWorkedOnExercise = new ArrayList<Student>();
+        for (Student student : course.getStudents()) {
+            ExerciseAnswer answer = exerciseAnswerRepository.findByStudentAndExercise(student, exercise);
+            if(answer != null) {
+                studentsThatWorkedOnExercise.add(student);
+            }
+        }
+        
+        return studentsThatWorkedOnExercise;
     }
 
     @RequestMapping(value = {"courses/{courseId}/students", "course/{courseId}/students"})
