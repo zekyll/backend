@@ -6,9 +6,12 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -85,5 +88,32 @@ public class CourseRESTController {
     public List<Snapshot> getStudentCourseSnapshots(@PathVariable("studentId") Student student, @PathVariable Long courseId, @PathVariable("exerciseId") Exercise exercise) {
         List<Snapshot> snapshots = exerciseAnswerRepository.findByStudentAndExercise(student, exercise).getSnapshots();
         return Snapshot.filterSequentialUnalteredSnapshots(snapshots);
+    }
+    
+    
+    @RequestMapping(value = {"course/{courseId}/student/{studentId}/exercise/{exerciseId}/snapshot/{snapshotId}/files", "courses/{courseId}/students/{studentId}/exercises/{exerciseId}/snapshots/{snapshotId}/files"})
+    @ResponseBody
+    public List<SnapshotFile> getSnapshotFiles(@PathVariable("snapshotId") Snapshot snapshot) {
+        List<SnapshotFile> files = snapshot.getFiles();
+        Collections.sort(files, new Comparator<SnapshotFile>() {
+            @Override
+            public int compare(SnapshotFile o1, SnapshotFile o2) {
+                return o1.getName().compareTo(o2.getName());
+            }
+        });
+        
+        return files;
+    }
+
+    @RequestMapping(value = {"course/{courseId}/student/{studentId}/exercise/{exerciseId}/snapshot/{snapshotId}/file/{snapshotFileId}", "courses/{courseId}/students/{studentId}/exercises/{exerciseId}/snapshots/{snapshotId}/files/{snapshotFileId}"})
+    @ResponseBody
+    public SnapshotFile getSnapshotFile(@PathVariable("snapshotFileId") SnapshotFile snapshotFile) {
+        return snapshotFile;
+    }
+
+    @RequestMapping(value = {"course/{courseId}/student/{studentId}/exercise/{exerciseId}/snapshot/{snapshotId}/file/{snapshotFileId}/content", "courses/{courseId}/students/{studentId}/exercises/{exerciseId}/snapshots/{snapshotId}/files/{snapshotFileId}/content"}, produces = "text/plain")
+    @ResponseBody
+    public FileSystemResource getSnapshotFileContent(@PathVariable("snapshotFileId") SnapshotFile snapshotFile) {
+        return new FileSystemResource(snapshotFile.getFilepath());
     }
 }
