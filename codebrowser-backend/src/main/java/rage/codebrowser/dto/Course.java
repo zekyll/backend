@@ -1,6 +1,7 @@
 package rage.codebrowser.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.Entity;
 import javax.persistence.ManyToMany;
@@ -24,6 +25,10 @@ public class Course extends AbstractNamedPersistable {
     }
 
     public List<Exercise> getExercises() {
+        if(exercises == null) {
+            exercises = new ArrayList<Exercise>();
+        }
+        
         return exercises;
     }
 
