@@ -1,20 +1,16 @@
 package rage.codebrowser.controller;
 
-import difflib.DiffUtils;
-import difflib.Patch;
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.LinkedList;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import rage.codebrowser.dto.Course;
 import rage.codebrowser.dto.Exercise;
@@ -22,8 +18,10 @@ import rage.codebrowser.dto.ExerciseAnswer;
 import rage.codebrowser.dto.Snapshot;
 import rage.codebrowser.dto.SnapshotFile;
 import rage.codebrowser.dto.Student;
+import rage.codebrowser.dto.Tag;
 import rage.codebrowser.repository.CourseRepository;
 import rage.codebrowser.repository.ExerciseAnswerRepository;
+import rage.codebrowser.repository.TagRepository;
 
 @Controller
 public class CourseRESTController {
@@ -32,6 +30,8 @@ public class CourseRESTController {
     private CourseRepository courseRepository;
     @Autowired
     private ExerciseAnswerRepository exerciseAnswerRepository;
+    @Autowired
+    private TagRepository tagRepository;
 
     @RequestMapping(value = {"courses"})
     @ResponseBody
@@ -115,5 +115,36 @@ public class CourseRESTController {
     @ResponseBody
     public FileSystemResource getSnapshotFileContent(@PathVariable("snapshotFileId") SnapshotFile snapshotFile) {
         return new FileSystemResource(snapshotFile.getFilepath());
+    }
+    
+    
+    @RequestMapping(value = {"course/{courseId}/student/{studentId}/exercise/{exerciseId}/tags", "courses/{courseId}/students/{studentId}/exercises/{exerciseId}/tags"}, method = RequestMethod.GET)
+    @ResponseBody
+    public List<Tag> getTags(@PathVariable("studentId") Student student, @PathVariable("courseId") Course course, @PathVariable("exerciseId") Exercise exercise) {
+        List<Tag> tags = tagRepository.findByStudentAndCourseAndExercise(student, course, exercise);
+        if(tags == null) {
+            tags = new ArrayList<Tag>();            
+        }
+        
+        Collections.sort(tags);
+        return tags;
+    }
+    
+    @RequestMapping(value = {"course/{courseId}/student/{studentId}/exercise/{exerciseId}/tags", 
+        "courses/{courseId}/students/{studentId}/exercises/{exerciseId}/tags"}, method = RequestMethod.POST)
+    @ResponseBody
+    public void postTag(@PathVariable("studentId") Student student, @PathVariable("courseId") Course course, @PathVariable("exerciseId") Exercise exercise, @RequestBody Tag tag) {
+        if(tag.getText() == null || tag.getText().trim().isEmpty()) {
+            return;
+        }
+        
+        tagRepository.save(tag);
+    }
+    
+    @RequestMapping(value = {"course/{courseId}/student/{studentId}/exercise/{exerciseId}/tags/{tagId}", 
+        "courses/{courseId}/students/{studentId}/exercises/{exerciseId}/tags/{tagId}"}, method = RequestMethod.DELETE)
+    @ResponseBody
+    public void deleteTag(@PathVariable("studentId") Student student, @PathVariable("courseId") Course course, @PathVariable("exerciseId") Exercise exercise, @PathVariable("tagId") Tag tag) {
+        tagRepository.delete(tag);
     }
 }
