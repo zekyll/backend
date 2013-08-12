@@ -118,7 +118,7 @@ public class CourseRESTController {
     }
     
     
-    @RequestMapping(value = {"course/{courseId}/student/{studentId}/exercise/{exerciseId}/tags", "courses/{courseId}/students/{studentId}/exercises/{exerciseId}/tags"}, method = RequestMethod.GET)
+    @RequestMapping(value = {"course/{courseId}/student/{studentId}/exercise/{exerciseId}/tags", "courses/{courseId}/students/{studentId}/exercises/{exerciseId}/tags"}, method = RequestMethod.GET, produces = "application/json" )
     @ResponseBody
     public List<Tag> getTags(@PathVariable("studentId") Student student, @PathVariable("courseId") Course course, @PathVariable("exerciseId") Exercise exercise) {
         List<Tag> tags = tagRepository.findByStudentAndCourseAndExercise(student, course, exercise);
@@ -130,15 +130,21 @@ public class CourseRESTController {
         return tags;
     }
     
-    @RequestMapping(value = {"course/{courseId}/student/{studentId}/exercise/{exerciseId}/tags", 
-        "courses/{courseId}/students/{studentId}/exercises/{exerciseId}/tags"}, method = RequestMethod.POST)
+    @RequestMapping(value = {"course/{courseId}/student/{studentId}/exercise/{exerciseId}/tag", 
+        "courses/{courseId}/students/{studentId}/exercises/{exerciseId}/tags"}, method = RequestMethod.POST, consumes = "application/json", produces = "application/json" )
     @ResponseBody
-    public void postTag(@PathVariable("studentId") Student student, @PathVariable("courseId") Course course, @PathVariable("exerciseId") Exercise exercise, @RequestBody Tag tag) {
-        if(tag.getText() == null || tag.getText().trim().isEmpty()) {
-            return;
-        }
-        
-        tagRepository.save(tag);
+    public Tag postTag(@PathVariable("studentId") Student student, @PathVariable("courseId") Course course, @PathVariable("exerciseId") Exercise exercise, @RequestBody Tag tag) {
+        tag.setCourse(course);
+        tag.setStudent(student);
+        tag.setExercise(exercise);
+        return tagRepository.saveAndFlush(tag);
+    }
+    
+    @RequestMapping(value = {"course/{courseId}/student/{studentId}/exercise/{exerciseId}/tag/{tagId}", 
+        "courses/{courseId}/students/{studentId}/exercises/{exerciseId}/tags/{tagId}"}, method = RequestMethod.GET, produces = "application/json" )
+    @ResponseBody
+    public Tag getTag(@PathVariable("studentId") Student student, @PathVariable("courseId") Course course, @PathVariable("exerciseId") Exercise exercise, @PathVariable("tagId") Long tagId) {
+        return tagRepository.findOne(tagId);
     }
     
     @RequestMapping(value = {"course/{courseId}/student/{studentId}/exercise/{exerciseId}/tags/{tagId}", 

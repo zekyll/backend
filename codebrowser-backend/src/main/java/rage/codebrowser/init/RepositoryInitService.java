@@ -58,6 +58,8 @@ public class RepositoryInitService {
 
         readInExercises("ohpe", 2, "/home/group/rage/MOOCDATA/s2012-ohpe/events-decompressed/", "Tietokanta", "Lyyrakortti");
         readInExercises("mooc-ohja", 2, "/home/group/rage/MOOCDATA/k2013-mooc/events-decompressed/", "Matopeli", "Numerotiedustelu", "Sanakirja");
+        
+        System.out.println("**************** DONE");
     }
 
     private void readInExercises(String courseName, int maxStudentsToConsider, String dataPath, String... exercisesToAccept) {

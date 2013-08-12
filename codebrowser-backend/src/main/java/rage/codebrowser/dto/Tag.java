@@ -5,9 +5,10 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import org.springframework.data.jpa.domain.AbstractPersistable;
 
 @Entity
-public class Tag extends AbstractNamedPersistable implements Comparable<Tag> {
+public class Tag extends AbstractPersistable<Long> implements Comparable<Tag> {
 
     @JoinColumn
     @JsonIgnore
@@ -63,5 +64,11 @@ public class Tag extends AbstractNamedPersistable implements Comparable<Tag> {
         }
 
         return text.compareTo(o.text);
+    }
+
+    @Override
+    @JsonIgnore
+    public boolean isNew() {
+        return super.isNew(); //To change body of generated methods, choose Tools | Templates.
     }
 }

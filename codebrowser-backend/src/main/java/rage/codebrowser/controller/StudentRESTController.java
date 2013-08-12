@@ -105,7 +105,7 @@ public class StudentRESTController {
         return snapshots;
     }
     
-    @RequestMapping(value = {"student/{studentId}/course/{courseId}/exercise/{exerciseId}/tags", "students/{studentId}/courses/{courseId}/exercises/{exerciseId}/tags"}, method = RequestMethod.GET)
+    @RequestMapping(value = {"student/{studentId}/course/{courseId}/exercise/{exerciseId}/tags", "students/{studentId}/courses/{courseId}/exercises/{exerciseId}/tags"}, method = RequestMethod.GET, produces = "application/json" )
     @ResponseBody
     public List<Tag> getTags(@PathVariable("studentId") Student student, @PathVariable("courseId") Course course, @PathVariable("exerciseId") Exercise exercise) {
         List<Tag> tags = tagRepository.findByStudentAndCourseAndExercise(student, course, exercise);
@@ -117,17 +117,24 @@ public class StudentRESTController {
         return tags;
     }
     
-    @RequestMapping(value = {"student/{studentId}/course/{courseId}/exercise/{exerciseId}/tags", "students/{studentId}/courses/{courseId}/exercises/{exerciseId}/tags"}, method = RequestMethod.POST)
+    @RequestMapping(value = {"student/{studentId}/course/{courseId}/exercise/{exerciseId}/tag", 
+        "students/{studentId}/courses/{courseId}/exercises/{exerciseId}/tags"}, method = RequestMethod.POST, consumes = "application/json", produces = "application/json" )
     @ResponseBody
-    public void postTag(@PathVariable("studentId") Student student, @PathVariable("courseId") Course course, @PathVariable("exerciseId") Exercise exercise, @RequestBody Tag tag) {
-        if(tag.getText() == null || tag.getText().trim().isEmpty()) {
-            return;
-        }
-        
-        tagRepository.save(tag);
+    public Tag postTag(@PathVariable("studentId") Student student, @PathVariable("courseId") Course course, @PathVariable("exerciseId") Exercise exercise, @RequestBody Tag tag) {
+        tag.setCourse(course);
+        tag.setStudent(student);
+        tag.setExercise(exercise);
+        return tagRepository.saveAndFlush(tag);
     }
     
-    @RequestMapping(value = {"student/{studentId}/course/{courseId}/exercise/{exerciseId}/tags/{tagId}", "students/{studentId}/courses/{courseId}/exercises/{exerciseId}/tags/{tagId}"}, method = RequestMethod.DELETE)
+    @RequestMapping(value = {"student/{studentId}/course/{courseId}/exercise/{exerciseId}/tag/{tagId}", 
+        "students/{studentId}/courses/{courseId}/exercises/{exerciseId}/tags/{tagId}"}, method = RequestMethod.GET, produces = "application/json" )
+    @ResponseBody
+    public Tag getTag(@PathVariable("studentId") Student student, @PathVariable("courseId") Course course, @PathVariable("exerciseId") Exercise exercise, @PathVariable("tagId") Long tagId) {
+        return tagRepository.findOne(tagId);
+    }
+    
+    @RequestMapping(value = {"student/{studentId}/course/{courseId}/exercise/{exerciseId}/tag/{tagId}", "students/{studentId}/courses/{courseId}/exercises/{exerciseId}/tags/{tagId}"}, method = RequestMethod.DELETE)
     @ResponseBody
     public void deleteTag(@PathVariable("studentId") Student student, @PathVariable("courseId") Course course, @PathVariable("exerciseId") Exercise exercise, @PathVariable("tagId") Tag tag) {
         tagRepository.delete(tag);
