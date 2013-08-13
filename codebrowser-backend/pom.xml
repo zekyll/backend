@@ -127,7 +127,7 @@
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-servlets</artifactId>
-            <version>8.1.10.v20130312</version>
+            <version>8.1.12.v20130726</version>
         </dependency>
         
         <!-- diff tools -->
