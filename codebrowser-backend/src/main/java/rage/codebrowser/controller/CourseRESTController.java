@@ -150,7 +150,8 @@ public class CourseRESTController {
     @RequestMapping(value = {"course/{courseId}/student/{studentId}/exercise/{exerciseId}/tags/{tagId}", 
         "courses/{courseId}/students/{studentId}/exercises/{exerciseId}/tags/{tagId}"}, method = RequestMethod.DELETE)
     @ResponseBody
-    public void deleteTag(@PathVariable("studentId") Student student, @PathVariable("courseId") Course course, @PathVariable("exerciseId") Exercise exercise, @PathVariable("tagId") Tag tag) {
+    public Tag deleteTag(@PathVariable("studentId") Student student, @PathVariable("courseId") Course course, @PathVariable("exerciseId") Exercise exercise, @PathVariable("tagId") Tag tag) {
         tagRepository.delete(tag);
+        return tag;
     }
 }
