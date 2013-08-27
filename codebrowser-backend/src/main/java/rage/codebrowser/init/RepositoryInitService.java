@@ -56,6 +56,7 @@ public class RepositoryInitService {
 //            }
 //        }
 
+        readInExercises("k2013-ohpe", 100, "/home/group/rage/MOOCDATA/k2013-ohpe/events-decompressed/", "Karkausvuosi" , "Tietokanta", "JoukkueetJaPelaajat", "SilmukatLopetusMuistaminen", "suurempi_luku", "SuurempiLuku", "Lyyrakortti");
         readInExercises("ohpe", 2, "/home/group/rage/MOOCDATA/s2012-ohpe/events-decompressed/", "Tietokanta", "Lyyrakortti");
         readInExercises("mooc-ohja", 2, "/home/group/rage/MOOCDATA/k2013-mooc/events-decompressed/", "Matopeli", "Numerotiedustelu", "Sanakirja");
         
