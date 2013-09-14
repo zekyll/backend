@@ -282,7 +282,7 @@ public class RepositoryInitService {
     private String getExerciseName(File snapshotDir) {
         for (File file : snapshotDir.listFiles()) {
             String filename = file.getName();
-            if (filename.toLowerCase().contains("viikko")) {
+            if (filename.toLowerCase().contains("viikko") || filename.toLowerCase().contains("week")) {
                 return filename.substring(filename.indexOf("-") + 1);
             }
         }
