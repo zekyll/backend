@@ -1,6 +1,8 @@
 package rage.codebrowser.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
@@ -11,15 +13,14 @@ import org.springframework.data.jpa.domain.AbstractPersistable;
 public class Tag extends AbstractPersistable<Long> implements Comparable<Tag> {
 
     @JoinColumn
-    @JsonIgnore
     @ManyToOne
+    @JsonIgnoreProperties({"exercises"})
     private Course course;
     @JoinColumn
-    @JsonIgnore
     @ManyToOne
+    @JsonIgnoreProperties({"courses"})
     private Student student;
     @JoinColumn
-    @JsonIgnore
     @ManyToOne
     private Exercise exercise;
     @Column
