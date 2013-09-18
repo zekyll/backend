@@ -8,9 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import rage.codebrowser.dto.Course;
 import rage.codebrowser.dto.Exercise;
@@ -18,7 +16,6 @@ import rage.codebrowser.dto.ExerciseAnswer;
 import rage.codebrowser.dto.Snapshot;
 import rage.codebrowser.dto.SnapshotFile;
 import rage.codebrowser.dto.Student;
-import rage.codebrowser.dto.Tag;
 import rage.codebrowser.repository.CourseRepository;
 import rage.codebrowser.repository.ExerciseAnswerRepository;
 import rage.codebrowser.repository.TagRepository;
@@ -89,8 +86,7 @@ public class CourseRESTController {
         List<Snapshot> snapshots = exerciseAnswerRepository.findByStudentAndExercise(student, exercise).getSnapshots();
         return Snapshot.filterSequentialUnalteredSnapshots(snapshots);
     }
-    
-    
+
     @RequestMapping(value = {"course/{courseId}/student/{studentId}/exercise/{exerciseId}/snapshot/{snapshotId}/files", "courses/{courseId}/students/{studentId}/exercises/{exerciseId}/snapshots/{snapshotId}/files"})
     @ResponseBody
     public List<SnapshotFile> getSnapshotFiles(@PathVariable("snapshotId") Snapshot snapshot) {
@@ -101,7 +97,7 @@ public class CourseRESTController {
                 return o1.getName().compareTo(o2.getName());
             }
         });
-        
+
         return files;
     }
 
@@ -115,43 +111,5 @@ public class CourseRESTController {
     @ResponseBody
     public FileSystemResource getSnapshotFileContent(@PathVariable("snapshotFileId") SnapshotFile snapshotFile) {
         return new FileSystemResource(snapshotFile.getFilepath());
-    }
-    
-    
-    @RequestMapping(value = {"course/{courseId}/student/{studentId}/exercise/{exerciseId}/tags", "courses/{courseId}/students/{studentId}/exercises/{exerciseId}/tags"}, method = RequestMethod.GET, produces = "application/json" )
-    @ResponseBody
-    public List<Tag> getTags(@PathVariable("studentId") Student student, @PathVariable("courseId") Course course, @PathVariable("exerciseId") Exercise exercise) {
-        List<Tag> tags = tagRepository.findByStudentAndCourseAndExercise(student, course, exercise);
-        if(tags == null) {
-            tags = new ArrayList<Tag>();            
-        }
-        
-        Collections.sort(tags);
-        return tags;
-    }
-    
-    @RequestMapping(value = {"course/{courseId}/student/{studentId}/exercise/{exerciseId}/tag", 
-        "courses/{courseId}/students/{studentId}/exercises/{exerciseId}/tags"}, method = RequestMethod.POST, consumes = "application/json", produces = "application/json" )
-    @ResponseBody
-    public Tag postTag(@PathVariable("studentId") Student student, @PathVariable("courseId") Course course, @PathVariable("exerciseId") Exercise exercise, @RequestBody Tag tag) {
-        tag.setCourse(course);
-        tag.setStudent(student);
-        tag.setExercise(exercise);
-        return tagRepository.saveAndFlush(tag);
-    }
-    
-    @RequestMapping(value = {"course/{courseId}/student/{studentId}/exercise/{exerciseId}/tag/{tagId}", 
-        "courses/{courseId}/students/{studentId}/exercises/{exerciseId}/tags/{tagId}"}, method = RequestMethod.GET, produces = "application/json" )
-    @ResponseBody
-    public Tag getTag(@PathVariable("studentId") Student student, @PathVariable("courseId") Course course, @PathVariable("exerciseId") Exercise exercise, @PathVariable("tagId") Long tagId) {
-        return tagRepository.findOne(tagId);
-    }
-    
-    @RequestMapping(value = {"course/{courseId}/student/{studentId}/exercise/{exerciseId}/tags/{tagId}", 
-        "courses/{courseId}/students/{studentId}/exercises/{exerciseId}/tags/{tagId}"}, method = RequestMethod.DELETE)
-    @ResponseBody
-    public Tag deleteTag(@PathVariable("studentId") Student student, @PathVariable("courseId") Course course, @PathVariable("exerciseId") Exercise exercise, @PathVariable("tagId") Tag tag) {
-        tagRepository.delete(tag);
-        return tag;
     }
 }
