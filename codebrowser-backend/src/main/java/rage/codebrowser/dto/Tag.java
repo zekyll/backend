@@ -2,8 +2,6 @@ package rage.codebrowser.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -16,15 +14,19 @@ public class Tag extends AbstractPersistable<Long> implements Comparable<Tag> {
     @ManyToOne
     @JsonIgnoreProperties({"exercises"})
     private Course course;
+
     @JoinColumn
     @ManyToOne
     @JsonIgnoreProperties({"courses"})
     private Student student;
+
     @JoinColumn
     @ManyToOne
     private Exercise exercise;
-    @Column
-    private String text;
+
+    @ManyToOne
+    @JsonIgnoreProperties({"tags"})
+    private TagName tagName;
 
     public Course getCourse() {
         return course;
@@ -50,26 +52,26 @@ public class Tag extends AbstractPersistable<Long> implements Comparable<Tag> {
         this.exercise = exercise;
     }
 
-    public String getText() {
-        return text;
+    public TagName getTagName() {
+        return tagName;
     }
 
-    public void setText(String text) {
-        this.text = text;
+    public void setTagName(TagName tagName) {
+        this.tagName = tagName;
     }
 
     @Override
     public int compareTo(Tag o) {
-        if (text == null) {
+        if (getTagName() == null) {
             return -1;
         }
 
-        return text.compareTo(o.text);
+        return getTagName().compareTo(o.getTagName());
     }
 
     @Override
     @JsonIgnore
     public boolean isNew() {
-        return super.isNew(); //To change body of generated methods, choose Tools | Templates.
+        return super.isNew();
     }
 }
