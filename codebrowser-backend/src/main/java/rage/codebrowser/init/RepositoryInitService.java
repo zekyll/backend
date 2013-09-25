@@ -210,7 +210,7 @@ public class RepositoryInitService {
         Snapshot ss = new Snapshot();
         
         int amountOfClassFiles = countClassFiles(snapshotDir).length;
-        if(javaFiles.size() == amountOfClassFiles) {
+        if(javaFiles.size() <= amountOfClassFiles) {
             ss.setCompiles(true);
         }
         else {
