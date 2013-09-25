@@ -127,9 +127,18 @@ public class StudentRESTController {
     @ResponseBody
     @Transactional
     public Tag postTag(@PathVariable("studentId") Student student, @PathVariable("courseId") Course course, @PathVariable("exerciseId") Exercise exercise, @RequestBody Tag tag) {
+        return postTag(student, course, exercise, null, tag);
+    }
+
+    @RequestMapping(value = {"student/{studentId}/course/{courseId}/exercise/{exerciseId}/snapshot/{snapshotId}/tag",
+        "students/{studentId}/courses/{courseId}/exercises/{exerciseId}/snapshots/{snapshotId}/tags"}, method = RequestMethod.POST, consumes = "application/json", produces = "application/json")
+    @ResponseBody
+    @Transactional
+    public Tag postTag(@PathVariable("studentId") Student student, @PathVariable("courseId") Course course, @PathVariable("exerciseId") Exercise exercise, @PathVariable("snapshotId") Snapshot snapshot, @RequestBody Tag tag) {
         tag.setCourse(course);
         tag.setStudent(student);
         tag.setExercise(exercise);
+        tag.setSnapshot(snapshot);
 
         TagName tagName = tagNameRepository.findByName(tag.getTagName().getName());
         if (tagName == null) {
@@ -149,10 +158,13 @@ public class StudentRESTController {
         return tagRepository.findOne(tagId);
     }
 
-    @RequestMapping(value = {"student/{studentId}/course/{courseId}/exercise/{exerciseId}/tag/{tagId}", "students/{studentId}/courses/{courseId}/exercises/{exerciseId}/tags/{tagId}"}, method = RequestMethod.DELETE)
+    @RequestMapping(value = {"student/{studentId}/course/{courseId}/exercise/{exerciseId}/tag/{tagId}",
+        "students/{studentId}/courses/{courseId}/exercises/{exerciseId}/tags/{tagId}",
+        "students/{studentId}/courses/{courseId}/exercises/{exerciseId}/snapshots/{snapshotId}/tags/{tagId}"},
+            method = RequestMethod.DELETE)
     @ResponseBody
     @Transactional
-    public Tag deleteTag(@PathVariable("studentId") Student student, @PathVariable("courseId") Course course, @PathVariable("exerciseId") Exercise exercise, @PathVariable("tagId") Tag tag) {
+    public Tag deleteTag(@PathVariable("tagId") Tag tag) {
         TagName tagName = tag.getTagName();
         tagName.getTags().remove(tag);
         tagRepository.delete(tag);

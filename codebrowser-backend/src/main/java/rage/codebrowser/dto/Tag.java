@@ -2,6 +2,8 @@ package rage.codebrowser.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -23,6 +25,12 @@ public class Tag extends AbstractPersistable<Long> implements Comparable<Tag> {
     @JoinColumn
     @ManyToOne
     private Exercise exercise;
+
+    // Null if the tag is not related to specific snapshot
+    @ManyToOne
+    @JsonIgnoreProperties({"files"})
+    @JsonInclude(Include.NON_NULL)
+    private Snapshot snapshot;
 
     @ManyToOne
     @JsonIgnoreProperties({"tags"})
@@ -50,6 +58,14 @@ public class Tag extends AbstractPersistable<Long> implements Comparable<Tag> {
 
     public void setExercise(Exercise exercise) {
         this.exercise = exercise;
+    }
+
+    public Snapshot getSnapshot() {
+        return snapshot;
+    }
+
+    public void setSnapshot(Snapshot snapshot) {
+        this.snapshot = snapshot;
     }
 
     public TagName getTagName() {
