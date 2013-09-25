@@ -195,20 +195,15 @@
                 <configuration>
                     <connectors>
                         <connector implementation="org.mortbay.jetty.nio.SelectChannelConnector">
-                            <port>3000</port>
+                            <port>${jetty.port}</port>
                             <maxIdleTime>60000</maxIdleTime>
                         </connector>
                     </connectors>
-<!--                    <scanIntervalSeconds>5</scanIntervalSeconds>
-                    <reload>automatic</reload>-->
-                    <stopKey>foo</stopKey>
-                    <stopPort>9999</stopPort>
                     <webAppConfig>
                         <contextPath>/</contextPath>
                     </webAppConfig>
                 </configuration>
             </plugin>
-            
         </plugins>
     </build>
 </project>
