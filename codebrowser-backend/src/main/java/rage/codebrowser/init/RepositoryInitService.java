@@ -64,13 +64,10 @@ public class RepositoryInitService {
 //            }
 //        }
 
-        readInExercises("mooc-en", 15, "../../data/mooc-en/events-decompressed/", "Library", "Birdwatcher", "SecondsOfTheYear", "Divider", "ChangingVariables", "Spruce", "Addition", "HelloWorld", "Multiplication", "AgeOfMajority", "AgeCheck");
-        readInExercises("mooc-2", 15, "../../data/mooc-2/events-decompressed/", "Library", "Birdwatcher", "SecondsOfTheYear", "Divider", "ChangingVariables", "Spruce", "Addition", "HelloWorld", "Multiplication", "AgeOfMajority", "AgeCheck");
-        /**
         readInExercises("k2013-ohpe", 100, "/home/group/rage/MOOCDATA/k2013-ohpe/events-decompressed/", "Karkausvuosi" , "Tietokanta", "JoukkueetJaPelaajat", "SilmukatLopetusMuistaminen", "suurempi_luku", "SuurempiLuku", "Lyyrakortti");
         readInExercises("ohpe", 2, "/home/group/rage/MOOCDATA/s2012-ohpe/events-decompressed/", "Tietokanta", "Lyyrakortti");
         readInExercises("mooc-ohja", 2, "/home/group/rage/MOOCDATA/k2013-mooc/events-decompressed/", "Matopeli", "Numerotiedustelu", "Sanakirja");
-        **/
+        
         System.out.println("**************** DONE");
     }
 
