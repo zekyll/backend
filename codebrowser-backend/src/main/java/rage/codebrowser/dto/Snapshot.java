@@ -31,6 +31,8 @@ public class Snapshot extends AbstractNamedPersistable implements Comparable<Sna
     private Exercise exercise;
     @Transient
     private CourseInfo course;
+    
+    private boolean compiles;
 
     public String getType() {
         return type;
@@ -78,6 +80,14 @@ public class Snapshot extends AbstractNamedPersistable implements Comparable<Sna
 
     public void setCourse(CourseInfo course) {
         this.course = course;
+    }
+
+    public boolean getCompiles() {
+        return compiles;
+    }
+
+    public void setCompiles(boolean compiles) {
+        this.compiles = compiles;
     }
 
     @Override

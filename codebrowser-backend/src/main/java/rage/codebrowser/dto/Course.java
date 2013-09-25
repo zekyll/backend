@@ -7,6 +7,7 @@ import javax.persistence.Entity;
 import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 
+
 @Entity
 public class Course extends AbstractNamedPersistable {
 
@@ -15,6 +16,7 @@ public class Course extends AbstractNamedPersistable {
     private List<Student> students;
     @OneToMany(mappedBy = "course")
     private List<Exercise> exercises;
+    private int amountOfStudents;
     
     public void addExercise(Exercise exercise) {
         if(getExercises().contains(exercise)) {
@@ -42,5 +44,25 @@ public class Course extends AbstractNamedPersistable {
 
     public void setStudents(List<Student> students) {
         this.students = students;
+        this.setAmountOfStudents();
+    }
+
+    /**
+     * @return the amountOfStudents
+     */
+    public int getAmountOfStudents() {
+        return amountOfStudents;
+    }
+
+    /**
+     * @param amountOfStudents the amountOfStudents to set
+     */
+    public void setAmountOfStudents() {
+        if (students != null){
+            this.amountOfStudents = students.size();
+        } else {
+            this.amountOfStudents = 0;
+        }
+        
     }
 }

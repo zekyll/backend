@@ -1,6 +1,7 @@
 package rage.codebrowser.init;
 
 import java.io.File;
+import java.io.FilenameFilter;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -63,10 +64,13 @@ public class RepositoryInitService {
 //            }
 //        }
 
+        readInExercises("mooc-en", 15, "../../data/mooc-en/events-decompressed/", "Library", "Birdwatcher", "SecondsOfTheYear", "Divider", "ChangingVariables", "Spruce", "Addition", "HelloWorld", "Multiplication", "AgeOfMajority", "AgeCheck");
+        readInExercises("mooc-2", 15, "../../data/mooc-2/events-decompressed/", "Library", "Birdwatcher", "SecondsOfTheYear", "Divider", "ChangingVariables", "Spruce", "Addition", "HelloWorld", "Multiplication", "AgeOfMajority", "AgeCheck");
+        /**
         readInExercises("k2013-ohpe", 100, "/home/group/rage/MOOCDATA/k2013-ohpe/events-decompressed/", "Karkausvuosi" , "Tietokanta", "JoukkueetJaPelaajat", "SilmukatLopetusMuistaminen", "suurempi_luku", "SuurempiLuku", "Lyyrakortti");
         readInExercises("ohpe", 2, "/home/group/rage/MOOCDATA/s2012-ohpe/events-decompressed/", "Tietokanta", "Lyyrakortti");
         readInExercises("mooc-ohja", 2, "/home/group/rage/MOOCDATA/k2013-mooc/events-decompressed/", "Matopeli", "Numerotiedustelu", "Sanakirja");
-        
+        **/
         System.out.println("**************** DONE");
     }
 
@@ -207,6 +211,14 @@ public class RepositoryInitService {
         String location = snapshotDir.getName();
         location = location.trim();
         Snapshot ss = new Snapshot();
+        
+        int amountOfClassFiles = countClassFiles(snapshotDir).length;
+        if(javaFiles.size() == amountOfClassFiles) {
+            ss.setCompiles(true);
+        }
+        else {
+            ss.setCompiles(false);
+        }
         try {
             ss.setSnapshotTime(Config.SNAPSHOT_DATE_FORMAT.parse(location));
         } catch (ParseException ex) {
@@ -253,6 +265,21 @@ public class RepositoryInitService {
         }
 
         ss = snapshotRepository.save(ss);
+    }
+    
+    /**
+     * 
+     * @param dir root directory of a snapshot, contains .class-files
+     * @return a File-array of .class-files. The existence of .class files is used
+     *         to determine whether or not the code compiles. 
+     */
+    public File[] countClassFiles(File dir){
+
+        return dir.listFiles(new FilenameFilter() { 
+                 public boolean accept(File dir, String filename)
+                      { return filename.endsWith(".class"); }
+        } );
+
     }
 
     private List<File> listJavaFiles(File fromDir) {
