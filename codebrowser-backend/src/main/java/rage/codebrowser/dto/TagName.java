@@ -12,7 +12,7 @@ import javax.persistence.OneToMany;
 public class TagName extends AbstractNamedPersistable implements Comparable<TagName> {
 
     /**
-     * Tags that used this text.
+     * Tags that are using this text.
      */
     @OneToMany(mappedBy = "tagName")
     private List<Tag> tags;

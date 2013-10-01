@@ -2,6 +2,7 @@ package rage.codebrowser.controller;
 
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -21,7 +22,19 @@ public class TagRESTController {
     @RequestMapping(value = {"tagnames"})
     @ResponseBody
     public List<TagName> getTagNames() {
-        return tagNameRepository.findAll();
+        return tagNameRepository.findAll(new Sort(Sort.Direction.ASC, "name"));
+    }
+
+    @RequestMapping(value = {"tagnames/exerciseanswers"})
+    @ResponseBody
+    public List<TagName> getExerciseAnswerTagNames() {
+        return tagNameRepository.findExerciseAnswerTagNames();
+    }
+
+    @RequestMapping(value = {"tagnames/snapshots"})
+    @ResponseBody
+    public List<TagName> getSnapshotTagNames() {
+        return tagNameRepository.findSnapshotTagNames();
     }
 
     @RequestMapping(value = {"tagnames/{tagNameId}"})
