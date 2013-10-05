@@ -17,6 +17,9 @@
         <constructor-arg ref="conversionService"/>
     </bean>
     
+    <!-- Definition for SnapshotFileConcepts bean -->
+    <bean class="rage.codebrowser.codenalyzer.CountWords" />
+    
     <mvc:annotation-driven conversion-service="conversionService" />
     
     <context:component-scan base-package="rage.codebrowser" />

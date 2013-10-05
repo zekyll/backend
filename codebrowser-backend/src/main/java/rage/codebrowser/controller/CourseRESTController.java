@@ -10,6 +10,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+import rage.codebrowser.codenalyzer.SnapshotFileConcepts;
 import rage.codebrowser.dto.Course;
 import rage.codebrowser.dto.Exercise;
 import rage.codebrowser.dto.ExerciseAnswer;
@@ -29,7 +30,7 @@ public class CourseRESTController {
     private ExerciseAnswerRepository exerciseAnswerRepository;
     @Autowired
     private TagRepository tagRepository;
-
+    
     @RequestMapping(value = {"courses"})
     @ResponseBody
     public List<Course> getCourses() {
