@@ -22,12 +22,14 @@ import rage.codebrowser.dto.ExerciseAnswer;
 import rage.codebrowser.dto.Snapshot;
 import rage.codebrowser.dto.SnapshotFile;
 import rage.codebrowser.dto.Student;
+import rage.codebrowser.dto.Testresult;
 import rage.codebrowser.repository.CourseRepository;
 import rage.codebrowser.repository.ExerciseAnswerRepository;
 import rage.codebrowser.repository.ExerciseRepository;
 import rage.codebrowser.repository.SnapshotFileRepository;
 import rage.codebrowser.repository.SnapshotRepository;
 import rage.codebrowser.repository.StudentRepository;
+import rage.codebrowser.repository.TestRepository;
 
 @Component
 public class RepositoryInitService {
@@ -44,6 +46,8 @@ public class RepositoryInitService {
     private SnapshotFileRepository snapshotFileRepository;
     @Autowired
     private ExerciseAnswerRepository eaRepository;
+    @Autowired
+    private TestRepository testRepository;
 
     private static class FileComparator implements Comparator<File> {
 
@@ -67,8 +71,10 @@ public class RepositoryInitService {
 //        readInExercises("k2013-ohpe", 100, "/home/group/rage/MOOCDATA/k2013-ohpe/events-decompressed/", "Karkausvuosi" , "Tietokanta", "JoukkueetJaPelaajat", "SilmukatLopetusMuistaminen", "suurempi_luku", "SuurempiLuku", "Lyyrakortti");
 //        readInExercises("ohpe", 2, "/home/group/rage/MOOCDATA/s2012-ohpe/events-decompressed/", "Tietokanta", "Lyyrakortti");
 //        readInExercises("mooc-ohja", 2, "/home/group/rage/MOOCDATA/k2013-mooc/events-decompressed/", "Matopeli", "Numerotiedustelu", "Sanakirja");
-        readInExercises("mooc-en", 2, "/home/group/codebro/data/mooc-en/events-decompressed/", "Birdwatcher", "Divider", "EvenNumbers", "LoopsEndingRemembering");
-        
+
+
+        readInExercises("mooc-en", 10, "/home/group/codebro/data/mooc-en/events-decompressed/", "Birdwatcher", "Divider", "EvenNumbers","LoopsEndingRemembering", "PrintingOutText", "PrintingLikeboss");
+        readInExercises("mooc-fi", 2, "/home/group/codebro/data/mooc-en/events-decompressed/", "Birdwatcher", "Divider", "EvenNumbers", "LoopsEndingRemembering");
         System.out.println("**************** DONE");
     }
 
@@ -199,6 +205,37 @@ public class RepositoryInitService {
             readSnapshot(student, exercise, snapshotDir);
         }
     }
+    /**
+     * Creates dummy test data for snapshot.
+     * 50% of snapshots will not have tests, others will have 2 tests.
+     * @return 
+     */
+    private List<Testresult> createDummyTests(){
+        List<Testresult> tests = new ArrayList<Testresult>();
+        int x=(Math.random()<0.5)?1:0;
+        if (x == 1) {
+            Testresult test = new Testresult();
+            test.setName("test1");
+            test.setMessage("Test1 output");
+            test.setPassed((Math.random()<0.5)?true:false);
+            test = testRepository.save(test);
+            tests.add(test);
+            Testresult test2 = new Testresult();
+            test2.setName("test2");
+            test2.setMessage("Test2 output");
+            test2.setPassed((Math.random()<0.5)?true:false);
+            test2 = testRepository.save(test2); 
+            tests.add(test2);
+            test = new Testresult();
+            test.setName("test3");
+            test.setMessage("Test3 output");
+            test.setPassed((Math.random()<0.5)?true:false);
+            test = testRepository.save(test);
+            tests.add(test);
+        }
+        
+        return tests;
+    }
 
     private void readSnapshot(Student student, Exercise exercise, File snapshotDir) {
         List<File> javaFiles = listJavaFiles(snapshotDir);
@@ -210,6 +247,7 @@ public class RepositoryInitService {
         location = location.trim();
         Snapshot ss = new Snapshot();
         
+        //If there are more class files than java files, the code compiles
         int amountOfClassFiles = countClassFiles(snapshotDir).length;
         if(javaFiles.size() <= amountOfClassFiles) {
             ss.setCompiles(true);
@@ -217,6 +255,10 @@ public class RepositoryInitService {
         else {
             ss.setCompiles(false);
         }
+        
+        //Create dummy test data for snapshot
+        ss.setTests(createDummyTests());
+        
         try {
             ss.setSnapshotTime(Config.SNAPSHOT_DATE_FORMAT.parse(location));
         } catch (ParseException ex) {
