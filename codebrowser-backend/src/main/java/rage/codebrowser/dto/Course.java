@@ -44,25 +44,26 @@ public class Course extends AbstractNamedPersistable {
 
     public void setStudents(List<Student> students) {
         this.students = students;
-        this.setAmountOfStudents();
+        this.setAmountOfStudents(students.size());
+
     }
 
     /**
      * @return the amountOfStudents
      */
     public int getAmountOfStudents() {
+        if (students != null && !students.isEmpty()){
+            amountOfStudents = students.size();
+        } else {
+            amountOfStudents = 0;
+        }
         return amountOfStudents;
     }
 
     /**
      * @param amountOfStudents the amountOfStudents to set
      */
-    public void setAmountOfStudents() {
-        if (students != null){
-            this.amountOfStudents = students.size();
-        } else {
-            this.amountOfStudents = 0;
-        }
-        
+    public void setAmountOfStudents(int amountOfStudents) {
+        this.amountOfStudents = amountOfStudents;  
     }
 }

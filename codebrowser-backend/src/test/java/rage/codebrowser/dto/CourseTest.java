@@ -1,7 +1,4 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
+
 package rage.codebrowser.dto;
 
 import java.util.ArrayList;
@@ -13,10 +10,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
-/**
- *
- * @author jonne
- */
+
 public class CourseTest {
     private Course course;
     private List<Student> students;
@@ -43,8 +37,13 @@ public class CourseTest {
     }
 
     @Test
+    public void testSetAmounOfStudentsWhenNullStudentList() {
+        assertEquals(course.getAmountOfStudents(), 0);
+    }
+
+    @Test
     public void testSetAmounOfStudentsWhenNoStudents() {
-        course.setAmountOfStudents();
+        course.setStudents(students);
         assertEquals(course.getAmountOfStudents(), 0);
     }
     
@@ -52,8 +51,6 @@ public class CourseTest {
     public void testSetAmounOfStudentsWhenStudents() {
         students.add(new Student());
         course.setStudents(students);
-        assertEquals(course.getAmountOfStudents(), 1);
-        course.setAmountOfStudents();
         assertEquals(course.getAmountOfStudents(), 1);
     }
 }
