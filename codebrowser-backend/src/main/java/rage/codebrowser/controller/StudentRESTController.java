@@ -3,7 +3,6 @@ package rage.codebrowser.controller;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -16,7 +15,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
-import rage.codebrowser.codenalyzer.SnapshotFileConcepts;
+import rage.codebrowser.codenalyzer.Concepts;
+import rage.codebrowser.codenalyzer.SnapshotConcepts;
 import rage.codebrowser.dto.Course;
 import rage.codebrowser.dto.CourseInfo;
 import rage.codebrowser.dto.Exercise;
@@ -43,7 +43,7 @@ public class StudentRESTController {
     @Autowired
     private TagNameRepository tagNameRepository;
     @Autowired
-    private SnapshotFileConcepts snapshotFileConcepts;
+    private SnapshotConcepts snapshotConcepts;
 
     @RequestMapping(value = {"students"})
     @ResponseBody
@@ -226,8 +226,17 @@ public class StudentRESTController {
         "students/{studentId}/courses/{courseId}/exercises/{exerciseId}/snapshots/{snapshotId}/files/{snapshotFileId}/concepts"
     })
     @ResponseBody
-    public HashMap<String, Integer> getSnapshotFileConcepts(@PathVariable("snapshotFileId") SnapshotFile snapshotFile) {
+    public Concepts getSnapshotFileConcepts(@PathVariable("snapshotFileId") SnapshotFile snapshotFile) {
         
-        return snapshotFileConcepts.getConcepts(snapshotFile);
+        return snapshotConcepts.getConcepts(snapshotFile);
+    }
+        
+    @RequestMapping(value = {
+        "student/{studentId}/course/{courseId}/exercise/{exerciseId}/snapshot/{snapshotId}/concepts",
+        "students/{studentId}/courses/{courseId}/exercises/{exerciseId}/snapshots/{snapshotId}/concepts"
+    })
+    @ResponseBody
+    public Concepts getSnapshotConcepts(@PathVariable("snapshotId") Snapshot snapshot) {
+        return snapshotConcepts.getConcepts(snapshot.getFiles());
     }
 }

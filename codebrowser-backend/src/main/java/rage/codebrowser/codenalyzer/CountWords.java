@@ -7,11 +7,11 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import rage.codebrowser.dto.SnapshotFile;
 
-public class CountWords implements SnapshotFileConcepts {
+public class CountWords implements SnapshotConcepts {
 
-    private class Concepts extends HashMap<String, Integer> {}
     
     private final String[] INTERESTING_WORDS = {
         "private",
@@ -27,7 +27,7 @@ public class CountWords implements SnapshotFileConcepts {
     };
 
     @Override
-    public HashMap<String, Integer> getConcepts(SnapshotFile input) {
+    public Concepts getConcepts(SnapshotFile input) {
 
         Concepts concepts = new Concepts();
 
@@ -71,5 +71,33 @@ public class CountWords implements SnapshotFileConcepts {
 
     private boolean isInterestingWord(String word) {
         return Arrays.asList(INTERESTING_WORDS).contains(word);
+    }
+
+    
+    
+    @Override
+    public Concepts getConcepts(List<SnapshotFile> input) {
+        Concepts snapshotConcepts = new Concepts();
+        
+        for (SnapshotFile file : input) {
+            Concepts fileConcepts = getConcepts(file);
+            
+            combine(fileConcepts, snapshotConcepts);
+        }
+        
+        return snapshotConcepts;
+    }
+    
+    
+    private void combine(Concepts from, Concepts to) {
+        for (String entry : from.keySet()) {
+            if (to.keySet().contains(entry)) {
+                int currentValue = to.get(entry);
+                int newValue = currentValue + from.get(entry);
+                to.put(entry, newValue);
+            } else {
+                to.put(entry, from.get(entry));
+            }
+        }
     }
 }

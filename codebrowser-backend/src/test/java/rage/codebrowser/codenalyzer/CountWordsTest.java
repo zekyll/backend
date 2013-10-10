@@ -21,7 +21,7 @@ public class CountWordsTest {
     }
     File tempFile;
     SnapshotFile tempSnapshot;
-    SnapshotFileConcepts countWords;
+    SnapshotConcepts countWords;
 
     @Before
     public void setUp() {
