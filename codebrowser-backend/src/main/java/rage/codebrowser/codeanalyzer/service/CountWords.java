@@ -1,12 +1,13 @@
-package rage.codebrowser.codenalyzer;
+package rage.codebrowser.codeanalyzer.service;
 
+import rage.codebrowser.codeanalyzer.domain.Concept;
+import rage.codebrowser.codeanalyzer.domain.ConceptCollection;
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import rage.codebrowser.dto.SnapshotFile;
 
@@ -27,20 +28,20 @@ public class CountWords implements SnapshotConcepts {
     };
 
     @Override
-    public Concepts getConcepts(SnapshotFile input) {
+    public ConceptCollection getConcepts(SnapshotFile input) {
 
-        Concepts concepts = new Concepts();
+        ConceptCollection concepts = new ConceptCollection();
 
         try {
             countWordsInFile(input, concepts);
         } catch (Exception e) {
-            concepts.put("error", 1);
+            concepts.add(new Concept("error", 1));
         }
 
         return concepts;
     }
 
-    private void countWordsInFile(SnapshotFile input, Concepts concepts) throws FileNotFoundException, IOException {
+    private void countWordsInFile(SnapshotFile input, ConceptCollection concepts) throws FileNotFoundException, IOException {
 
         BufferedReader reader = openReader(input.getFilepath());
 
@@ -62,10 +63,14 @@ public class CountWords implements SnapshotConcepts {
         return line.split("\\s");
     }
 
-    private void processWord(String w, Concepts concepts) {
+    private void processWord(String w, ConceptCollection concepts) {
         if (isInterestingWord(w)) {
-            int newValue = (concepts.containsKey(w)) ? concepts.get(w) + 1 : 1;
-            concepts.put(w, newValue);
+            if (concepts.contains(w)) {
+                Concept c = concepts.getByName(w);
+                c.size += 1;
+            } else {
+                concepts.add( new Concept(w, 1) );
+            }
         }
     }
 
@@ -76,28 +81,17 @@ public class CountWords implements SnapshotConcepts {
     
     
     @Override
-    public Concepts getConcepts(List<SnapshotFile> input) {
-        Concepts snapshotConcepts = new Concepts();
+    public ConceptCollection getConcepts(List<SnapshotFile> input) {
+        ConceptCollection snapshotConcepts = new ConceptCollection();
         
         for (SnapshotFile file : input) {
-            Concepts fileConcepts = getConcepts(file);
+            ConceptCollection fileConcepts = getConcepts(file);
             
-            combine(fileConcepts, snapshotConcepts);
+            snapshotConcepts.combine(fileConcepts);
         }
         
         return snapshotConcepts;
     }
     
-    
-    private void combine(Concepts from, Concepts to) {
-        for (String entry : from.keySet()) {
-            if (to.keySet().contains(entry)) {
-                int currentValue = to.get(entry);
-                int newValue = currentValue + from.get(entry);
-                to.put(entry, newValue);
-            } else {
-                to.put(entry, from.get(entry));
-            }
-        }
-    }
+
 }

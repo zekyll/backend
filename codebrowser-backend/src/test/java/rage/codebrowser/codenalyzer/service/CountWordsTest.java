@@ -2,13 +2,15 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package rage.codebrowser.codenalyzer;
+package rage.codebrowser.codenalyzer.service;
 
+import rage.codebrowser.codeanalyzer.service.SnapshotConcepts;
+import rage.codebrowser.codeanalyzer.domain.ConceptCollection;
+import rage.codebrowser.codeanalyzer.service.CountWords;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.HashMap;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -17,6 +19,8 @@ import rage.codebrowser.dto.SnapshotFile;
 
 public class CountWordsTest {
 
+    private final double epsilon = 0.05;
+    
     public CountWordsTest() {
     }
     File tempFile;
@@ -75,33 +79,32 @@ public class CountWordsTest {
 
     @Test
     public void testDoesntFindPrivate() {
-        HashMap<String, Integer> concepts = countWords.getConcepts(tempSnapshot);
+        ConceptCollection concepts = countWords.getConcepts(tempSnapshot);
 
-        assertFalse(concepts.containsKey("private"));
+        assertFalse(concepts.contains("private"));
     }
 
     @Test
     public void testFindsPublic() {
-        HashMap<String, Integer> concepts = countWords.getConcepts(tempSnapshot);
+        ConceptCollection concepts = countWords.getConcepts(tempSnapshot);
 
-        assertTrue(concepts.containsKey("public"));
-        assertEquals(2, (int) concepts.get("public"));
+        assertTrue(concepts.contains("public"));
+        assertEquals(2.0, concepts.getByName("public").size, epsilon);
     }
 
     @Test
     public void testFindsAssignments() {
-        HashMap<String, Integer> concepts = countWords.getConcepts(tempSnapshot);
+        ConceptCollection concepts = countWords.getConcepts(tempSnapshot);
 
-        assertTrue(concepts.containsKey("="));
-        assertEquals(4, (int) concepts.get("="));
+        assertTrue(concepts.contains("="));
+        assertEquals(4.0, concepts.getByName("=").size, epsilon);
     }
 
     @Test
     public void testReturnsErrorWithNonExistingFile() {
         tempFile.delete();
-        HashMap<String, Integer> concepts = countWords.getConcepts(tempSnapshot);
+        ConceptCollection concepts = countWords.getConcepts(tempSnapshot);
 
-        assertTrue(concepts.containsKey("error"));
-        assertEquals(1, (int) concepts.get("error"));
+        assertTrue(concepts.contains("error"));
     }
 }

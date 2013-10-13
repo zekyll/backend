@@ -15,8 +15,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
-import rage.codebrowser.codenalyzer.Concepts;
-import rage.codebrowser.codenalyzer.SnapshotConcepts;
+import rage.codebrowser.codeanalyzer.domain.ConceptCollection;
+import rage.codebrowser.codeanalyzer.service.SnapshotConcepts;
 import rage.codebrowser.dto.Course;
 import rage.codebrowser.dto.CourseInfo;
 import rage.codebrowser.dto.Exercise;
@@ -226,7 +226,7 @@ public class StudentRESTController {
         "students/{studentId}/courses/{courseId}/exercises/{exerciseId}/snapshots/{snapshotId}/files/{snapshotFileId}/concepts"
     })
     @ResponseBody
-    public Concepts getSnapshotFileConcepts(@PathVariable("snapshotFileId") SnapshotFile snapshotFile) {
+    public ConceptCollection getSnapshotFileConcepts(@PathVariable("snapshotFileId") SnapshotFile snapshotFile) {
         
         return snapshotConcepts.getConcepts(snapshotFile);
     }
@@ -236,7 +236,7 @@ public class StudentRESTController {
         "students/{studentId}/courses/{courseId}/exercises/{exerciseId}/snapshots/{snapshotId}/concepts"
     })
     @ResponseBody
-    public Concepts getSnapshotConcepts(@PathVariable("snapshotId") Snapshot snapshot) {
+    public ConceptCollection getSnapshotConcepts(@PathVariable("snapshotId") Snapshot snapshot) {
         return snapshotConcepts.getConcepts(snapshot.getFiles());
     }
 }
