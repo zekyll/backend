@@ -295,9 +295,11 @@ public class RepositoryInitService {
             SnapshotFile sf = new SnapshotFile();
 
             String filename = getFilenameWithPackage(snapshotDir.getAbsolutePath(), file.getAbsolutePath());
+            Long filesize = file.length();
 
             sf.setName(filename);
             sf.setFilepath(path);
+            sf.setFilesize(filesize);
 
             sf = snapshotFileRepository.save(sf);
 
