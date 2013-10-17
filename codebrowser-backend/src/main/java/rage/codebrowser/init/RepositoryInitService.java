@@ -184,7 +184,7 @@ public class RepositoryInitService {
     }
 
     private void readSnapshotsForExercise(Course course, Student student, String exerciseName, Map<String, List<File>> snapshotDirs) {
-        Exercise exercise = exerciseRepository.findByName(exerciseName);
+        Exercise exercise = exerciseRepository.findByCourseAndName(course, exerciseName);
         if (exercise == null) {
             exercise = new Exercise();
             exercise.setName(exerciseName);
