@@ -1,5 +1,6 @@
 package rage.codebrowser.dto;
 
+import rage.codebrowser.codeanalyzer.domain.DiffList;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import javax.persistence.Entity;
 
@@ -9,6 +10,7 @@ public class SnapshotFile extends AbstractNamedPersistable {
     @JsonIgnore
     private String filepath;
     private long filesize;
+    private DiffList diffs;
 
     public String getFilepath() {
         return filepath;
@@ -31,4 +33,19 @@ public class SnapshotFile extends AbstractNamedPersistable {
     public void setFilesize(long filesize) {
         this.filesize = filesize;
     }
+
+    /**
+     * @return the diffs
+     */
+    public DiffList getDiffs() {
+        return diffs;
+    }
+
+    /**
+     * @param diffs the diffs to set
+     */
+    public void setDiffs(DiffList diffs) {
+        this.diffs = diffs;
+    }
+
 }

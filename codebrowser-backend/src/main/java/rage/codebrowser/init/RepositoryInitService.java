@@ -1,5 +1,6 @@
 package rage.codebrowser.init;
 
+import rage.codebrowser.codeanalyzer.service.CountDiffs;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.text.ParseException;
@@ -7,8 +8,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -16,6 +19,7 @@ import javax.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import rage.codebrowser.repository.DiffListRepository;
 import rage.codebrowser.dto.Course;
 import rage.codebrowser.dto.Exercise;
 import rage.codebrowser.dto.ExerciseAnswer;
@@ -24,6 +28,7 @@ import rage.codebrowser.dto.SnapshotFile;
 import rage.codebrowser.dto.Student;
 import rage.codebrowser.dto.Testresult;
 import rage.codebrowser.repository.CourseRepository;
+import rage.codebrowser.repository.DiffRepository;
 import rage.codebrowser.repository.ExerciseAnswerRepository;
 import rage.codebrowser.repository.ExerciseRepository;
 import rage.codebrowser.repository.SnapshotFileRepository;
@@ -48,7 +53,13 @@ public class RepositoryInitService {
     private ExerciseAnswerRepository eaRepository;
     @Autowired
     private TestRepository testRepository;
-
+    @Autowired
+    private DiffListRepository diffsRepository;
+    @Autowired
+    private DiffRepository dr;
+    @Autowired
+    private CountDiffs counter;
+    
     private static class FileComparator implements Comparator<File> {
 
         @Override
@@ -72,12 +83,66 @@ public class RepositoryInitService {
 //        readInExercises("ohpe", 2, "/home/group/rage/MOOCDATA/s2012-ohpe/events-decompressed/", "Tietokanta", "Lyyrakortti");
 //        readInExercises("mooc-ohja", 2, "/home/group/rage/MOOCDATA/k2013-mooc/events-decompressed/", "Matopeli", "Numerotiedustelu", "Sanakirja");
 
-
         readInExercises("mooc-en", 10, "/home/group/codebro/data/mooc-en/events-decompressed/", "Birdwatcher", "Divider", "EvenNumbers","LoopsEndingRemembering", "PrintingOutText", "PrintingLikeboss");
         readInExercises("mooc-fi", 2, "/home/group/codebro/data/mooc-en/events-decompressed/", "Birdwatcher", "Divider", "EvenNumbers", "LoopsEndingRemembering");
         System.out.println("**************** DONE");
+        countDifferencesForFiles();
+        
     }
+    
+    private void countDifferencesForFiles() {
+        List<Student> students = studentRepository.findAll();
+        for (Student student : students) {
+            for (Course course : student.getCourses()) {             
+                for (Exercise exercise : getStudentCourse(student, course).getExercises()) {
+                    List<Snapshot> snapshots = eaRepository.findByStudentAndExercise(student, exercise).getSnapshots();
+                    Collections.sort(snapshots);
+                    countDifferencesForSnapshots(snapshots);
+                }
+            }
+        }
+    }
+    
+    private Course getStudentCourse(Student student, Course course) {
+        List<Exercise> exercises = course.getExercises();
 
+        Set<Exercise> existingExercises = new HashSet<Exercise>();
+        List<ExerciseAnswer> answers = eaRepository.findByStudent(student);
+        for (ExerciseAnswer exerciseAnswer : answers) {
+            existingExercises.add(exerciseAnswer.getExercise());
+        }
+
+        exercises.retainAll(existingExercises);
+        course.setExercises(exercises);
+        return course;
+    }
+    
+    private void countDifferencesForSnapshots(List<Snapshot> snapshots) {
+        for (int i = 0; i < snapshots.size(); i++) {
+            List<SnapshotFile> files = snapshots.get(i).getFiles();
+
+            for (int j = 0; j < files.size(); j++) {
+                SnapshotFile current = files.get(j);
+                //If index is 0, there is no previous snapshot or file
+                if (i == 0) {
+                    current.setDiffs(counter.getDifferences(null, current.getFilepath()));
+                    snapshotFileRepository.save(current);
+                } else {
+                    List<SnapshotFile> previousFiles = snapshots.get(i - 1).getFiles();
+                    //previous file is null unless a file with same name is found in previous snapshot
+                    SnapshotFile previous = null;
+                    for (SnapshotFile snapshotFile : previousFiles) {
+                        if (snapshotFile.getName().equals(current.getName())) {
+                            previous = snapshotFile;
+                        }
+                    }
+                    current.setDiffs(counter.getDifferences(previous == null ? null : previous.getFilepath(), current.getFilepath()));
+                    snapshotFileRepository.save(current);
+                }
+            }
+        }
+    }
+    
     private void readInExercises(String courseName, int maxStudentsToConsider, String dataPath, String... exercisesToAccept) {
         Course course = new Course();
         course.setName(courseName);
@@ -258,6 +323,7 @@ public class RepositoryInitService {
         
         //Create dummy test data for snapshot
         ss.setTests(createDummyTests());
+  
         
         try {
             ss.setSnapshotTime(Config.SNAPSHOT_DATE_FORMAT.parse(location));
