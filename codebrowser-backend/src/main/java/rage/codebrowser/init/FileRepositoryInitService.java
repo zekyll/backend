@@ -180,7 +180,7 @@ public class FileRepositoryInitService implements RepositoryInitService {
     }
 
     private void readSnapshotsForExercise(Course course, Student student, String exerciseName, Map<String, List<File>> snapshotDirs) {
-        Exercise exercise = exerciseRepository.findByName(exerciseName);
+        Exercise exercise = exerciseRepository.findByCourseAndName(course, exerciseName);
         if (exercise == null) {
             exercise = new Exercise();
             exercise.setName(exerciseName);
@@ -258,7 +258,7 @@ public class FileRepositoryInitService implements RepositoryInitService {
         try {
             ss.setSnapshotTime(Config.SNAPSHOT_DATE_FORMAT.parse(location));
         } catch (ParseException ex) {
-            Logger.getLogger(FileRepositoryInitService.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(RepositoryInitService.class.getName()).log(Level.SEVERE, null, ex);
             return;
         }
 
@@ -291,9 +291,11 @@ public class FileRepositoryInitService implements RepositoryInitService {
             SnapshotFile sf = new SnapshotFile();
 
             String filename = getFilenameWithPackage(snapshotDir.getAbsolutePath(), file.getAbsolutePath());
+            Long filesize = file.length();
 
             sf.setName(filename);
             sf.setFilepath(path);
+            sf.setFilesize(filesize);
 
             sf = snapshotFileRepository.save(sf);
 
