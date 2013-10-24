@@ -64,16 +64,16 @@
         </bean>
         <jdbc:embedded-database id="dataSource" type="HSQL"/>
 
-        <bean class="rage.codebrowser.init.FileRepositoryInitService" />
+<!--        <bean class="rage.codebrowser.init.FileRepositoryInitService" />-->
     </beans>
 
-    <beans profile="test">
+<!--    <beans profile="test">
         <bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
             <property name="properties" value="persistenceUnitName=persistenceUnitDev"/>
         </bean>
         <jdbc:embedded-database id="dataSource" type="HSQL"/>
 
         <bean class="rage.codebrowser.init.TestRepositoryInitService" />
-    </beans>
+    </beans>-->
 
 </beans>

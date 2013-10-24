@@ -201,7 +201,7 @@
                     </webAppConfig>
                 </configuration>
 
-                <executions>
+<!--                <executions>
                     <execution>
                         <id>start-jetty</id>
                         <phase>pre-integration-test</phase>
@@ -232,7 +232,7 @@
                             <goal>stop</goal>
                         </goals>
                     </execution>
-                </executions>
+                </executions>-->
 
             </plugin>
 
@@ -288,7 +288,7 @@
             </plugin>
 
 
-            <plugin>
+<!--            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>2.16</version>
@@ -317,7 +317,7 @@
                         </configuration>
                     </execution>
                 </executions>
-            </plugin>
+            </plugin>-->
 
         </plugins>
     </build>
