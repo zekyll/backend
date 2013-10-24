@@ -164,6 +164,7 @@
                 <groupId>org.mortbay.jetty</groupId>
                 <artifactId>jetty-maven-plugin</artifactId>
                 <version>7.4.2.v20110526</version>
+
                 <configuration>
                     <systemProperties>
                         <systemProperty>
@@ -183,20 +184,26 @@
                 </configuration>
 
                 <executions>
-
-<!--                    <execution>
+                    <execution>
                         <id>start-jetty</id>
                         <phase>pre-integration-test</phase>
                         <goals>
                             <goal>run</goal>
                         </goals>
                         <configuration>
+                            <systemProperties>
+                                <systemProperty>
+                                    <name>jetty.port</name>
+                                    <value>10377</value>
+                                </systemProperty>
+                                <systemProperty>
+                                    <name>spring.profiles.active</name>
+                                    <value>test</value>
+                                </systemProperty>
+                            </systemProperties>
                             <scanIntervalSeconds>0</scanIntervalSeconds>
                             <daemon>true</daemon>
 
-                            <properties>
-                                <spring.profile.active>test</spring.profile.active>
-                            </properties>
                         </configuration>
                     </execution>
 
@@ -206,8 +213,7 @@
                         <goals>
                             <goal>stop</goal>
                         </goals>
-                    </execution>-->
-
+                    </execution>
                 </executions>
 
             </plugin>
