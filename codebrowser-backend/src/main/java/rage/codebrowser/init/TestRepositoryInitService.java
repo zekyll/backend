@@ -61,13 +61,16 @@ public class TestRepositoryInitService implements RepositoryInitService {
         int courseIndex = 1;
         for( Course c : courseRepository.findAll() ) {
             for (int i = 1; i <= courseIndex * 10 ; i++) {
+
                 Student s = new Student();
                 s.setName(c.getName() + "_student_" + String.format("%04d", i));
-
                 s = studentRepository.save(s);
 
                 c.getStudents().add(s);
                 c = courseRepository.save(c);
+
+                s.getCourses().add(c);
+                s = studentRepository.save(s);
             }
             courseIndex++;
         }
