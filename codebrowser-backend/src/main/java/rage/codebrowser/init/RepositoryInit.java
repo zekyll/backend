@@ -9,10 +9,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Component
 public class RepositoryInit {
 
-//    @Autowired
-//    RepositoryInitService service;
-
-    FileRepositoryInitService service;
+    @Autowired
+    RepositoryInitService service;
     
     @PostConstruct
     @Transactional

@@ -201,7 +201,7 @@
                     </webAppConfig>
                 </configuration>
 
-<!--                <executions>
+                <executions>
                     <execution>
                         <id>start-jetty</id>
                         <phase>pre-integration-test</phase>
@@ -232,7 +232,7 @@
                             <goal>stop</goal>
                         </goals>
                     </execution>
-                </executions>-->
+                </executions>
 
             </plugin>
 
@@ -300,7 +300,7 @@
                         <include>**/rage/**</include>
                     </includes>
                 </configuration>
-<!--                <executions>
+                <executions>
                     <execution>
                         <id>integration-test</id>
                         <phase>integration-test</phase>
@@ -316,7 +316,7 @@
                             </includes>
                         </configuration>
                     </execution>
-                </executions>-->
+                </executions>
             </plugin>
 
         </plugins>

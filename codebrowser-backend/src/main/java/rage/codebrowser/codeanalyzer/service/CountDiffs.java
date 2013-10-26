@@ -75,8 +75,6 @@ public class CountDiffs {
         List<Diff> diffs = new LinkedList<Diff>();
 
         for (Delta delta : patch.getDeltas()) {
-            System.out.println(delta);
-
             if ((delta.getType().toString()).equals("CHANGE")) {
                 addChange(diffs, delta);
             } else if ((delta.getType().toString()).equals("DELETE")) {
