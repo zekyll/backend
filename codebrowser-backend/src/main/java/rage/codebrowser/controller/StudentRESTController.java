@@ -51,19 +51,19 @@ public class StudentRESTController {
         return studentRepository.findAll();
     }
 
-    @RequestMapping(value = {"student/{studentId}", "students/{studentId}"})
+    @RequestMapping(value = {"students/{studentId}"})
     @ResponseBody
     public Student getStudent(@PathVariable("studentId") Student student) {
         return student;
     }
 
-    @RequestMapping(value = {"student/{studentId}/courses", "students/{studentId}/courses"})
+    @RequestMapping(value = {"students/{studentId}/courses"})
     @ResponseBody
     public List<Course> getStudentCourses(@PathVariable("studentId") Student student) {
         return student.getCourses();
     }
 
-    @RequestMapping(value = {"student/{studentId}/course/{courseId}", "students/{studentId}/courses/{courseId}"})
+    @RequestMapping(value = {"students/{studentId}/courses/{courseId}"})
     @ResponseBody
     public Course getStudentCourse(@PathVariable("studentId") Student student, @PathVariable("courseId") Course course) {
         List<Exercise> exercises = course.getExercises();
@@ -79,13 +79,13 @@ public class StudentRESTController {
         return course;
     }
 
-    @RequestMapping(value = {"student/{studentId}/course/{courseId}/exercises", "students/{studentId}/courses/{courseId}/exercises"})
+    @RequestMapping(value = {"students/{studentId}/courses/{courseId}/exercises"})
     @ResponseBody
     public List<Exercise> getStudentCourseExercises(@PathVariable("studentId") Student student, @PathVariable("courseId") Course course) {
         return getStudentCourse(student, course).getExercises();
     }
 
-    @RequestMapping(value = {"student/{studentId}/course/{courseId}/exercise/{exerciseId}", "students/{studentId}/courses/{courseId}/exercises/{exerciseId}"})
+    @RequestMapping(value = {"students/{studentId}/courses/{courseId}/exercises/{exerciseId}"})
     @ResponseBody
     public Exercise getExerciseAnswer(@PathVariable("studentId") Student student, @PathVariable("courseId") Course course, @PathVariable("exerciseId") Exercise exercise) {
         List<Exercise> exercises = getStudentCourseExercises(student, course);
@@ -96,7 +96,7 @@ public class StudentRESTController {
         return exercise;
     }
 
-    @RequestMapping(value = {"student/{studentId}/course/{courseId}/exercise/{exerciseId}/snapshots", "students/{studentId}/courses/{courseId}/exercises/{exerciseId}/snapshots"})
+    @RequestMapping(value = {"students/{studentId}/courses/{courseId}/exercises/{exerciseId}/snapshots"})
     @ResponseBody
     public List<Snapshot> getSnapshots(@PathVariable("studentId") Student student, @PathVariable("courseId") Course course, @PathVariable("exerciseId") Exercise exercise) {
         List<Exercise> exercises = getStudentCourseExercises(student, course);
@@ -114,7 +114,8 @@ public class StudentRESTController {
         return snapshots;
     }
 
-    @RequestMapping(value = {"student/{studentId}/course/{courseId}/exercise/{exerciseId}/tags", "students/{studentId}/courses/{courseId}/exercises/{exerciseId}/tags"}, method = RequestMethod.GET, produces = "application/json")
+    @RequestMapping(value = {"students/{studentId}/courses/{courseId}/exercises/{exerciseId}/tags"},
+            method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
     public List<Tag> getTags(@PathVariable("studentId") Student student, @PathVariable("courseId") Course course, @PathVariable("exerciseId") Exercise exercise) {
         List<Tag> tags = tagRepository.findByStudentAndCourseAndExercise(student, course, exercise);
@@ -126,16 +127,16 @@ public class StudentRESTController {
         return tags;
     }
 
-    @RequestMapping(value = {"student/{studentId}/course/{courseId}/exercise/{exerciseId}/tag",
-        "students/{studentId}/courses/{courseId}/exercises/{exerciseId}/tags"}, method = RequestMethod.POST, consumes = "application/json", produces = "application/json")
+    @RequestMapping(value = {"students/{studentId}/courses/{courseId}/exercises/{exerciseId}/tags"},
+            method = RequestMethod.POST, consumes = "application/json", produces = "application/json")
     @ResponseBody
     @Transactional
     public Tag postTag(@PathVariable("studentId") Student student, @PathVariable("courseId") Course course, @PathVariable("exerciseId") Exercise exercise, @RequestBody Tag tag) {
         return postTag(student, course, exercise, null, tag);
     }
 
-    @RequestMapping(value = {"student/{studentId}/course/{courseId}/exercise/{exerciseId}/snapshot/{snapshotId}/tag",
-        "students/{studentId}/courses/{courseId}/exercises/{exerciseId}/snapshots/{snapshotId}/tags"}, method = RequestMethod.POST, consumes = "application/json", produces = "application/json")
+    @RequestMapping(value = {"students/{studentId}/courses/{courseId}/exercises/{exerciseId}/snapshots/{snapshotId}/tags"},
+            method = RequestMethod.POST, consumes = "application/json", produces = "application/json")
     @ResponseBody
     @Transactional
     public Tag postTag(@PathVariable("studentId") Student student, @PathVariable("courseId") Course course, @PathVariable("exerciseId") Exercise exercise, @PathVariable("snapshotId") Snapshot snapshot, @RequestBody Tag tag) {
@@ -155,15 +156,14 @@ public class StudentRESTController {
         return tagRepository.saveAndFlush(tag);
     }
 
-    @RequestMapping(value = {"student/{studentId}/course/{courseId}/exercise/{exerciseId}/tag/{tagId}",
-        "students/{studentId}/courses/{courseId}/exercises/{exerciseId}/tags/{tagId}"}, method = RequestMethod.GET, produces = "application/json")
+    @RequestMapping(value = {"students/{studentId}/courses/{courseId}/exercises/{exerciseId}/tags/{tagId}"},
+            method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
     public Tag getTag(@PathVariable("studentId") Student student, @PathVariable("courseId") Course course, @PathVariable("exerciseId") Exercise exercise, @PathVariable("tagId") Long tagId) {
         return tagRepository.findOne(tagId);
     }
 
-    @RequestMapping(value = {"student/{studentId}/course/{courseId}/exercise/{exerciseId}/tag/{tagId}",
-        "students/{studentId}/courses/{courseId}/exercises/{exerciseId}/tags/{tagId}",
+    @RequestMapping(value = {"students/{studentId}/courses/{courseId}/exercises/{exerciseId}/tags/{tagId}",
         "students/{studentId}/courses/{courseId}/exercises/{exerciseId}/snapshots/{snapshotId}/tags/{tagId}"},
             method = RequestMethod.DELETE)
     @ResponseBody
@@ -180,7 +180,7 @@ public class StudentRESTController {
         return tag;
     }
 
-    @RequestMapping(value = {"student/{studentId}/course/{courseId}/exercise/{exerciseId}/snapshot/{snapshotId}", "students/{studentId}/courses/{courseId}/exercises/{exerciseId}/snapshots/{snapshotId}"})
+    @RequestMapping(value = {"students/{studentId}/courses/{courseId}/exercises/{exerciseId}/snapshots/{snapshotId}"})
     @ResponseBody
     public Snapshot getSnapshot(@PathVariable("snapshotId") Snapshot snapshot, @PathVariable("courseId") Course course, @PathVariable("exerciseId") Exercise exercise) {
         Collections.sort(snapshot.getFiles(), new Comparator<SnapshotFile>() {
@@ -194,7 +194,7 @@ public class StudentRESTController {
         return snapshot;
     }
 
-    @RequestMapping(value = {"student/{studentId}/course/{courseId}/exercise/{exerciseId}/snapshot/{snapshotId}/files", "students/{studentId}/courses/{courseId}/exercises/{exerciseId}/snapshots/{snapshotId}/files"})
+    @RequestMapping(value = {"students/{studentId}/courses/{courseId}/exercises/{exerciseId}/snapshots/{snapshotId}/files"})
     @ResponseBody
     public List<SnapshotFile> getSnapshotFiles(@PathVariable("snapshotId") Snapshot snapshot) {
         List<SnapshotFile> files = snapshot.getFiles();
@@ -208,33 +208,27 @@ public class StudentRESTController {
         return files;
     }
 
-    @RequestMapping(value = {"student/{studentId}/course/{courseId}/exercise/{exerciseId}/snapshot/{snapshotId}/file/{snapshotFileId}", "students/{studentId}/courses/{courseId}/exercises/{exerciseId}/snapshots/{snapshotId}/files/{snapshotFileId}"})
+    @RequestMapping(value = {"students/{studentId}/courses/{courseId}/exercises/{exerciseId}/snapshots/{snapshotId}/files/{snapshotFileId}"})
     @ResponseBody
     public SnapshotFile getSnapshotFile(@PathVariable("snapshotFileId") SnapshotFile snapshotFile) {
         return snapshotFile;
     }
 
-    @RequestMapping(value = {"student/{studentId}/course/{courseId}/exercise/{exerciseId}/snapshot/{snapshotId}/file/{snapshotFileId}/content", "students/{studentId}/courses/{courseId}/exercises/{exerciseId}/snapshots/{snapshotId}/files/{snapshotFileId}/content"}, produces = "text/plain")
+    @RequestMapping(value = {"students/{studentId}/courses/{courseId}/exercises/{exerciseId}/snapshots/{snapshotId}/files/{snapshotFileId}/content"}, produces = "text/plain")
     @ResponseBody
     public FileSystemResource getSnapshotFileContent(@PathVariable("snapshotFileId") SnapshotFile snapshotFile) {
         return new FileSystemResource(snapshotFile.getFilepath());
     }
     
         
-    @RequestMapping(value = {
-        "student/{studentId}/course/{courseId}/exercise/{exerciseId}/snapshot/{snapshotId}/file/{snapshotFileId}/concepts",
-        "students/{studentId}/courses/{courseId}/exercises/{exerciseId}/snapshots/{snapshotId}/files/{snapshotFileId}/concepts"
-    })
+    @RequestMapping(value = {"students/{studentId}/courses/{courseId}/exercises/{exerciseId}/snapshots/{snapshotId}/files/{snapshotFileId}/concepts"})
     @ResponseBody
     public ConceptCollection getSnapshotFileConcepts(@PathVariable("snapshotFileId") SnapshotFile snapshotFile) {
         
         return snapshotConcepts.getConcepts(snapshotFile);
     }
         
-    @RequestMapping(value = {
-        "student/{studentId}/course/{courseId}/exercise/{exerciseId}/snapshot/{snapshotId}/concepts",
-        "students/{studentId}/courses/{courseId}/exercises/{exerciseId}/snapshots/{snapshotId}/concepts"
-    })
+    @RequestMapping(value = {"students/{studentId}/courses/{courseId}/exercises/{exerciseId}/snapshots/{snapshotId}/concepts"})
     @ResponseBody
     public ConceptCollection getSnapshotConcepts(@PathVariable("snapshotId") Snapshot snapshot) {
         return snapshotConcepts.getConcepts(snapshot.getFiles());
