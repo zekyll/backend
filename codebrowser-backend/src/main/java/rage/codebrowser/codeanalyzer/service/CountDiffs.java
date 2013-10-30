@@ -52,13 +52,22 @@ public class CountDiffs {
             return lines;
         }
         String line = "";
+        BufferedReader in = null;
         try {
-            BufferedReader in = new BufferedReader(new FileReader(filename));
+            in = new BufferedReader(new FileReader(filename));
             while ((line = in.readLine()) != null) {
                 lines.add(line);
             }
         } catch (IOException e) {
             e.printStackTrace();
+        } finally {
+            if (in != null) {
+                try {
+                    in.close();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
         }
         return lines;
     }

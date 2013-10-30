@@ -43,13 +43,25 @@ public class CountWords implements SnapshotConcepts {
 
     private void countWordsInFile(SnapshotFile input, ConceptCollection concepts) throws FileNotFoundException, IOException {
 
-        BufferedReader reader = openReader(input.getFilepath());
+        BufferedReader reader = null;
 
-        String line;
+        try {
+            reader = openReader(input.getFilepath());
 
-        while ((line = reader.readLine()) != null) {
-            for (String w : getWords(line)) {
-                processWord(w, concepts);
+            String line;
+
+            while ((line = reader.readLine()) != null) {
+                for (String w : getWords(line)) {
+                    processWord(w, concepts);
+                }
+            }
+        } finally {
+            if (reader != null) {
+                try {
+                    reader.close();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         }
     }
