@@ -7,14 +7,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import rage.codebrowser.codeanalyzer.service.CountDiffs;
 import rage.codebrowser.dto.Course;
 import rage.codebrowser.dto.Exercise;
@@ -33,8 +32,8 @@ import rage.codebrowser.repository.SnapshotRepository;
 import rage.codebrowser.repository.StudentRepository;
 import rage.codebrowser.repository.TestRepository;
 
-
-public class FileRepositoryInitService implements RepositoryInitService {
+@Component
+public class FileRepositoryInitService {
 
     @Autowired
     private StudentRepository studentRepository;
@@ -57,6 +56,8 @@ public class FileRepositoryInitService implements RepositoryInitService {
     @Autowired
     private CountDiffs counter;
 
+    private Course course;
+
     private static class FileComparator implements Comparator<File> {
 
         @Override
@@ -65,50 +66,23 @@ public class FileRepositoryInitService implements RepositoryInitService {
         }
     }
 
-    public void initRepository() {
-//        for (String dataPath : Config.POSSIBLE_DATA_PATHS) {
-//            File dataLocation = new File(dataPath);
-//            if (dataLocation.exists() && dataLocation.isDirectory() && dataLocation.canRead()) {
-//                Config.DATA_PATH = dataPath;
-//                break;
-//            }
-//        }
-
-//        readInExercises("k2013-ohpe", 100, "/home/group/rage/MOOCDATA/k2013-ohpe/events-decompressed/", "Karkausvuosi" , "Tietokanta", "JoukkueetJaPelaajat", "SilmukatLopetusMuistaminen", "suurempi_luku", "SuurempiLuku", "Lyyrakortti");
-//        readInExercises("ohpe", 2, "/home/group/rage/MOOCDATA/s2012-ohpe/events-decompressed/", "Tietokanta", "Lyyrakortti");
-//        readInExercises("mooc-ohja", 2, "/home/group/rage/MOOCDATA/k2013-mooc/events-decompressed/", "Matopeli", "Numerotiedustelu", "Sanakirja");
-
-        readInExercises("mooc-en", 10, "/home/group/codebro/data/mooc-en/events-decompressed/", "Birdwatcher", "Divider", "EvenNumbers", "LoopsEndingRemembering", "PrintingOutText", "PrintingLikeboss");
-        readInExercises("mooc-fi", 2, "/home/group/codebro/data/mooc-en/events-decompressed/", "Birdwatcher", "Divider", "EvenNumbers", "LoopsEndingRemembering");
-        System.out.println("**************** DONE");
+    public void initCourseData(String courseName, int maxStudentsToConsider, int minStudentSnapshots, String dataPath, String... exercisesToAccept)
+    {
+        readCourseDirectory(courseName, maxStudentsToConsider, minStudentSnapshots, dataPath, exercisesToAccept);
         countDifferencesForFiles();
     }
 
     private void countDifferencesForFiles() {
-        List<Student> students = studentRepository.findAll();
-        for (Student student : students) {
-            for (Course course : student.getCourses()) {
-                for (Exercise exercise : getStudentCourse(student, course).getExercises()) {
-                    List<Snapshot> snapshots = eaRepository.findByStudentAndExercise(student, exercise).getSnapshots();
+        for (Student student : course.getStudents()) {
+            for (Exercise excercise : course.getExercises()) {
+                ExerciseAnswer ea = eaRepository.findByStudentAndExercise(student, excercise);
+                if (ea != null) {
+                    List<Snapshot> snapshots = ea.getSnapshots();
                     Collections.sort(snapshots);
                     countDifferencesForSnapshots(snapshots);
                 }
             }
         }
-    }
-
-    private Course getStudentCourse(Student student, Course course) {
-        List<Exercise> exercises = course.getExercises();
-
-        Set<Exercise> existingExercises = new HashSet<Exercise>();
-        List<ExerciseAnswer> answers = eaRepository.findByStudent(student);
-        for (ExerciseAnswer exerciseAnswer : answers) {
-            existingExercises.add(exerciseAnswer.getExercise());
-        }
-
-        exercises.retainAll(existingExercises);
-        course.setExercises(exercises);
-        return course;
     }
 
     private void countDifferencesForSnapshots(List<Snapshot> snapshots) {
@@ -137,8 +111,8 @@ public class FileRepositoryInitService implements RepositoryInitService {
         }
     }
 
-    private void readInExercises(String courseName, int maxStudentsToConsider, String dataPath, String... exercisesToAccept) {
-        Course course = new Course();
+    private void readCourseDirectory(String courseName, int maxStudentsToConsider, int minStudentSnapshots, String dataPath, String... exercisesToAccept) {
+        course = new Course();
         course.setName(courseName);
         course = courseRepository.save(course);
 
@@ -152,14 +126,13 @@ public class FileRepositoryInitService implements RepositoryInitService {
                 break;
             }
 
-            if (readStudentDirectory(course, studentDir, Arrays.asList(exercisesToAccept))) {
+            if (readStudentDirectory(studentDir, Arrays.asList(exercisesToAccept), minStudentSnapshots)) {
                 studentCount++;
             }
         }
     }
 
-    private boolean readStudentDirectory(Course course, File studentDir, List<String> exerciseList) {
-
+    private boolean readStudentDirectory(File studentDir, List<String> exerciseList, int minStudentSnapshots) {
         if (!studentDir.isDirectory()) {
             return false;
         }
@@ -167,9 +140,6 @@ public class FileRepositoryInitService implements RepositoryInitService {
         // find exercises that this student has worked on
         // 1. snapshots
         File[] studentSnapshotDirs = studentDir.listFiles();
-        if (studentSnapshotDirs.length < 100) {
-            return false;
-        }
 
         Arrays.sort(studentSnapshotDirs, new FileComparator());
 
@@ -181,7 +151,7 @@ public class FileRepositoryInitService implements RepositoryInitService {
             acceptedSnapshotCount += exerciseSnapshots.size();
         }
 
-        if (snapshotDirs.size() < exerciseList.size() - 1 || acceptedSnapshotCount < 50) {
+        if (acceptedSnapshotCount < minStudentSnapshots) {
             return false;
         }
 
@@ -204,7 +174,7 @@ public class FileRepositoryInitService implements RepositoryInitService {
         }
 
         for (String exerciseName : snapshotDirs.keySet()) {
-            readSnapshotsForExercise(course, student, exerciseName, snapshotDirs);
+            readSnapshotsForExercise(student, exerciseName, snapshotDirs);
         }
 
         return true;
@@ -242,7 +212,7 @@ public class FileRepositoryInitService implements RepositoryInitService {
         return snapshotDirs;
     }
 
-    private void readSnapshotsForExercise(Course course, Student student, String exerciseName, Map<String, List<File>> snapshotDirs) {
+    private void readSnapshotsForExercise(Student student, String exerciseName, Map<String, List<File>> snapshotDirs) {
         Exercise exercise = exerciseRepository.findByCourseAndName(course, exerciseName);
         if (exercise == null) {
             exercise = new Exercise();
@@ -322,7 +292,7 @@ public class FileRepositoryInitService implements RepositoryInitService {
         try {
             ss.setSnapshotTime(Config.SNAPSHOT_DATE_FORMAT.parse(location));
         } catch (ParseException ex) {
-            Logger.getLogger(RepositoryInitService.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(FileRepositoryInitService.class.getName()).log(Level.SEVERE, null, ex);
             return;
         }
 
@@ -341,12 +311,6 @@ public class FileRepositoryInitService implements RepositoryInitService {
         ss = snapshotRepository.save(ss);
         ea.addSnapshot(ss);
         ea = eaRepository.save(ea);
-
-        if (javaFiles.size() > 1) {
-            System.out.println("*****************************");
-            System.out.println("More than 1 file at " + snapshotDir.getAbsolutePath());
-            System.out.println("*****************************");
-        }
 
         Collections.sort(javaFiles, new FileComparator());
 

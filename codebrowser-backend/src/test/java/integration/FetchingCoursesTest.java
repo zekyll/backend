@@ -1,94 +1,66 @@
 package integration;
 
-import com.gargoylesoftware.htmlunit.Page;
-import com.gargoylesoftware.htmlunit.WebClient;
-import com.gargoylesoftware.htmlunit.WebResponse;
+import com.fasterxml.jackson.databind.JsonNode;
+import static integration.BaseFetchingTest.checkCourseFields;
+import static integration.BaseFetchingTest.checkExerciseFields;
+import static integration.BaseFetchingTest.findElementWithName;
 import java.io.IOException;
-import java.util.Iterator;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 import org.junit.Test;
 import static org.junit.Assert.*;
-import org.junit.AfterClass;
 import org.junit.BeforeClass;
 
+public class FetchingCoursesTest extends BaseFetchingTest {
 
-public class FetchingCoursesTest  {
-
-    static WebClient client;
-    static Page page;
-    static WebResponse response;
-    static JSONArray courses;
-    static JSONParser parser;
-
-    static String coursePage = "http://0.0.0.0:10377/app/courses";
-
+    private static JsonNode courses;
 
     @BeforeClass
-    public static void setupClientAndLoadPage() throws IOException {
-        client = new WebClient();
-        page = client.getPage(coursePage);
-
-        response = page.getWebResponse();
-        parser = new JSONParser();
-
-        try {
-            courses = (JSONArray) parser.parse(response.getContentAsString());
-        } catch (ParseException ex) {
-            fail("Response is not json");
-        }
+    public static void fetchPage() throws IOException {
+        courses = fetchJson("courses");
     }
-
-    @AfterClass
-    public static void closeBrowser() {
-        client.closeAllWindows();
-    }
-
-
 
     @Test
-    public void testTwoCoursesShouldExist() {
+    public void isArray() {
+        assertTrue(courses.isArray());
+    }
+
+    @Test
+    public void hasTwoCourses() {
         assertEquals(2, courses.size());
     }
 
     @Test
-    public void testUnitTestingCourseShouldExist() {
-
-        boolean found = false;
-
-        Iterator<JSONObject> iterator = courses.iterator();
-
-        while (iterator.hasNext()) {
-            JSONObject course = iterator.next();
-
-            if (course.containsKey("name") && course.get("name").equals("unit-test-course")) {
-                found = true;
-            }
-        }
-
-        assertTrue(found);
+    public void course1HasCorrectFields() {
+        JsonNode course = findElementWithName(courses, "course_1");
+        checkCourseFields(course, -1, "course_1", 2);
     }
-
 
     @Test
-    public void testUnitTestingCourseShouldHave10Students() {
+    public void course1HasCorrectExercises() {
+        JsonNode course = findElementWithName(courses, "course_1");
+        assertTrue(course.get("exercises").isArray());
+        assertEquals(2, course.get("exercises").size());
 
-        boolean found = false;
-
-        Iterator<JSONObject> iterator = courses.iterator();
-
-        while (iterator.hasNext()) {
-            JSONObject course = iterator.next();
-
-            if (course.containsKey("name") && course.get("name").equals("unit-test-course")) {
-                assertEquals(Long.parseLong("10"), course.get("amountOfStudents"));
-                found = true;
-            }
-        }
-
-        assertTrue(found);
+        JsonNode exc1 = findElementWithName(course.get("exercises"), "exercise_1");
+        checkExerciseFields(exc1, -1, "exercise_1");
+        JsonNode exc2 = findElementWithName(course.get("exercises"), "exercise_2");
+        checkExerciseFields(exc2, -1, "exercise_2");
     }
 
+    @Test
+    public void course2HasCorrectFields() {
+        JsonNode course = findElementWithName(courses, "course_2");
+        checkCourseFields(course, -1, "course_2", 2);
+    }
+
+    @Test
+    public void course2HasCorrectExercises() {
+        JsonNode course = findElementWithName(courses, "course_2");
+        assertTrue(course.get("exercises").isArray());
+        assertEquals(2, course.get("exercises").size());
+
+        JsonNode exc2 = findElementWithName(course.get("exercises"), "exercise_2");
+        checkExerciseFields(exc2, -1, "exercise_2");
+        JsonNode exc3 = findElementWithName(course.get("exercises"), "exercise_3");
+        checkExerciseFields(exc3, -1, "exercise_3");
+    }
 }

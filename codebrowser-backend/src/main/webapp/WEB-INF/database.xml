@@ -56,6 +56,10 @@
             <property name="username" value="#{ @dbUrl.getUserInfo().split(':')[0] }"/>
             <property name="password" value="#{ @dbUrl.getUserInfo().split(':')[1] }"/>
         </bean>
+
+        <bean name="useTestRepository" class="java.lang.Boolean">
+            <constructor-arg value="false"/>
+        </bean>
     </beans>
 
     <beans profile="dev,default,users">
@@ -64,7 +68,9 @@
         </bean>
         <jdbc:embedded-database id="dataSource" type="HSQL"/>
 
-        <bean class="rage.codebrowser.init.FileRepositoryInitService" />
+        <bean name="useTestRepository" class="java.lang.Boolean">
+            <constructor-arg value="false"/>
+        </bean>
     </beans>
 
     <beans profile="test">
@@ -73,7 +79,9 @@
         </bean>
         <jdbc:embedded-database id="dataSource" type="HSQL"/>
 
-        <bean class="rage.codebrowser.init.TestRepositoryInitService" />
+        <bean name="useTestRepository" class="java.lang.Boolean">
+            <constructor-arg value="true"/>
+        </bean>
     </beans>
 
 </beans>
