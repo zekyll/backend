@@ -1,6 +1,7 @@
 package rage.codebrowser.codeanalyzer.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import java.io.Serializable;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -30,16 +31,19 @@ public class Diff implements Serializable {
      * StartPosition of delete in previous file.
      * Not set for other types.
      */
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private Integer fromRowEnd;
      /**
      * EndPosition of delete in previous file.
      * Not set for other types.
      */
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private Integer fromRowStart;
     /**
      * Deleted lines as a String.
      * Not set for other types.
      */
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private String lines;
 
     
