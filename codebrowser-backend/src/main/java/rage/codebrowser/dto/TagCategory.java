@@ -21,7 +21,6 @@ public class TagCategory extends AbstractNamedPersistable implements Comparable<
          if (getName() == null) {
             return -1;
         }
-
         return getName().compareTo(o.getName());
     }
 
