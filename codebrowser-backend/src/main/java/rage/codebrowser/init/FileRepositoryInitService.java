@@ -21,6 +21,7 @@ import rage.codebrowser.dto.ExerciseAnswer;
 import rage.codebrowser.dto.Snapshot;
 import rage.codebrowser.dto.SnapshotFile;
 import rage.codebrowser.dto.Student;
+import rage.codebrowser.dto.StudentGroup;
 import rage.codebrowser.dto.Testresult;
 import rage.codebrowser.repository.CourseRepository;
 import rage.codebrowser.repository.DiffListRepository;
@@ -29,6 +30,7 @@ import rage.codebrowser.repository.ExerciseAnswerRepository;
 import rage.codebrowser.repository.ExerciseRepository;
 import rage.codebrowser.repository.SnapshotFileRepository;
 import rage.codebrowser.repository.SnapshotRepository;
+import rage.codebrowser.repository.StudentGroupRepository;
 import rage.codebrowser.repository.StudentRepository;
 import rage.codebrowser.repository.TestRepository;
 
@@ -36,23 +38,35 @@ import rage.codebrowser.repository.TestRepository;
 public class FileRepositoryInitService {
 
     @Autowired
+    private StudentGroupRepository studentGroupRepository;
+
+    @Autowired
     private StudentRepository studentRepository;
+
     @Autowired
     private CourseRepository courseRepository;
+
     @Autowired
     private ExerciseRepository exerciseRepository;
+
     @Autowired
     private SnapshotRepository snapshotRepository;
+
     @Autowired
     private SnapshotFileRepository snapshotFileRepository;
+
     @Autowired
     private ExerciseAnswerRepository eaRepository;
+
     @Autowired
     private TestRepository testRepository;
+
     @Autowired
     private DiffListRepository diffsRepository;
+
     @Autowired
     private DiffRepository dr;
+
     @Autowired
     private CountDiffs counter;
 
@@ -66,8 +80,7 @@ public class FileRepositoryInitService {
         }
     }
 
-    public void initCourseData(String courseName, int maxStudentsToConsider, int minStudentSnapshots, String dataPath, String... exercisesToAccept)
-    {
+    public void initCourseData(String courseName, int maxStudentsToConsider, int minStudentSnapshots, String dataPath, String... exercisesToAccept) {
         readCourseDirectory(courseName, maxStudentsToConsider, minStudentSnapshots, dataPath, exercisesToAccept);
         countDifferencesForFiles();
     }
@@ -161,6 +174,7 @@ public class FileRepositoryInitService {
             student = new Student();
             student.setName(studentName);
             student = studentRepository.save(student);
+            addStudentToRandomGroups(student);
         }
 
         if (!course.getStudents().contains(student)) {
@@ -178,6 +192,31 @@ public class FileRepositoryInitService {
         }
 
         return true;
+    }
+
+    private void addStudentToRandomGroups(Student student) {
+        student.setGroups(new ArrayList<StudentGroup>());
+
+        for (char i = 0; i < 5; i++) {
+            if (Math.random() < 0.4) {
+                continue;
+            }
+
+            String groupName = "Group " + (char) ('A' + i);
+
+            StudentGroup group = studentGroupRepository.findByName(groupName);
+            if (group == null) {
+                group = new StudentGroup();
+                group.setName(groupName);
+                group.setStudents(new ArrayList<Student>());
+            }
+
+            group.getStudents().add(student);
+            group = studentGroupRepository.save(group);
+
+            student.getGroups().add(group);
+            student = studentRepository.save(student);
+        }
     }
 
     private Map<String, List<File>> getAcceptedSnapshotDirs(File[] studentSnapshotDirs, List<String> exerciseList) {
