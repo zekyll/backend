@@ -36,9 +36,9 @@ public class RepositoryInit {
 //        readInExercises("ohpe", 2, "/home/group/rage/MOOCDATA/s2012-ohpe/events-decompressed/", "Tietokanta", "Lyyrakortti");
 //        readInExercises("mooc-ohja", 2, "/home/group/rage/MOOCDATA/k2013-mooc/events-decompressed/", "Matopeli", "Numerotiedustelu", "Sanakirja");
 
-        service.initCourseData("mooc-en", 10, 0, "/home/group/codebro/data/mooc-en/events-decompressed/", "Birdwatcher", "Divider", "EvenNumbers", "LoopsEndingRemembering", "PrintingOutText", "PrintingLikeboss", "HangmanLogic", "PhoneBook");
-        service.initCourseData("mooc-fi", 2, 0, "/home/group/codebro/data/mooc-en/events-decompressed/", "Birdwatcher", "Divider", "EvenNumbers", "LoopsEndingRemembering", "HangmanLogic", "PhoneBook", "LoopsInReverseOrder");
-        System.out.println("**************** DONE");
+         service.initCourseData("mooc-en", 10, 0, "/home/group/codebro/data/mooc-en/events-decompressed/", "Birdwatcher", "Divider", "EvenNumbers", "LoopsEndingRemembering", "PrintingOutText", "PrintingLikeboss", "HangmanLogic", "PhoneBook");
+         service.initCourseData("mooc-fi", 2, 0, "/home/group/codebro/data/mooc-en/events-decompressed/", "Birdwatcher", "Divider", "EvenNumbers", "LoopsEndingRemembering", "HangmanLogic", "PhoneBook", "LoopsInReverseOrder");
+         System.out.println("**************** DONE");
     }
 
     private void initTestRepository() {

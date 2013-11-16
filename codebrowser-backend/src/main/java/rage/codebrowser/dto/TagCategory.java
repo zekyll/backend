@@ -43,6 +43,10 @@ public class TagCategory extends AbstractNamedPersistable implements Comparable<
             getTagnames().add(tagname);
         }
     }
+    
+    public void removeTagName(TagName tagname) {
+        tagnames.remove(tagname);
+    }
 
     /**
      * @param tagnames the tagnames to set
