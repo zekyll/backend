@@ -4,7 +4,6 @@ public class Concept {
 
     public String name;
     public double size;
-    public String snapshotId;
 
     public Concept(String name, double size) {
         this.name = name;
