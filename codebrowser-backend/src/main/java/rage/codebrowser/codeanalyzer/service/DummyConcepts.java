@@ -70,9 +70,6 @@ public class DummyConcepts implements SnapshotConcepts {
         return result;
     }
     
-    
-    
-    
     private ConceptCollection randomConcepts() {
         int howMany = randomBetween(MIN_CONCEPTS_IN_FILE, maxConceptsInFile());
         
