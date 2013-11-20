@@ -6,7 +6,6 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -89,14 +88,14 @@ public class TagCategoryRESTController {
     
     @RequestMapping(value = {"tagcategories/{tagCategoryId}"}, method = RequestMethod.PUT, consumes = "application/json", produces = "application/json")
     @ResponseBody
-    @Transactional
     public TagCategory postTagCategoryTagNames(@RequestBody TagCategory tagcategory) {
-        TagCategory existing = tagCategoryRepository.findByName(tagcategory.getName());
         for (TagName tagname : tagcategory.getTagnames()) {
-            existing.addTagName(tagname);
+            if (tagname.addTagCategory(tagcategory)) {
+                tagNameRepository.save(tagname);
+            }
         }
-        tagCategoryRepository.saveAndFlush(existing);
-        return existing;
+        tagCategoryRepository.save(tagcategory);
+        return tagcategory;
     }
         
     @RequestMapping(value = {"tagcategories"}, method = RequestMethod.POST, consumes = "application/json", produces = "application/json")
@@ -112,6 +111,10 @@ public class TagCategoryRESTController {
     @RequestMapping(value = {"tagcategories/{tagCategoryId}"}, method = RequestMethod.DELETE)
     @ResponseBody
     public TagCategory deleteTagCategory(@PathVariable("tagCategoryId") TagCategory tagCategory) {
+        for (TagName tagname : tagCategory.getTagnames()) {
+            tagname.removeTagCategory(tagCategory);
+            tagNameRepository.save(tagname);
+        }
         tagCategoryRepository.delete(tagCategory);
         return tagCategory;
     }
@@ -120,7 +123,8 @@ public class TagCategoryRESTController {
     @ResponseBody
     public TagCategory deleteTagFromCategory(@PathVariable("tagCategoryId") TagCategory tagCategory, @PathVariable("tagNameId") TagName tagName) {
         tagCategory.removeTagName(tagName);
-        tagCategoryRepository.save(tagCategory);
+        tagName.removeTagCategory(tagCategory);
+        tagCategoryRepository.saveAndFlush(tagCategory);
         return tagCategory;
     }
 }

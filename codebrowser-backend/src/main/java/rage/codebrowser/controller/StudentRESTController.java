@@ -25,9 +25,11 @@ import rage.codebrowser.dto.Snapshot;
 import rage.codebrowser.dto.SnapshotFile;
 import rage.codebrowser.dto.Student;
 import rage.codebrowser.dto.Tag;
+import rage.codebrowser.dto.TagCategory;
 import rage.codebrowser.dto.TagName;
 import rage.codebrowser.repository.ExerciseAnswerRepository;
 import rage.codebrowser.repository.StudentRepository;
+import rage.codebrowser.repository.TagCategoryRepository;
 import rage.codebrowser.repository.TagNameRepository;
 import rage.codebrowser.repository.TagRepository;
 
@@ -42,6 +44,8 @@ public class StudentRESTController {
     private TagRepository tagRepository;
     @Autowired
     private TagNameRepository tagNameRepository;
+    @Autowired
+    private TagCategoryRepository tagCategoryRepository;
     @Autowired
     private SnapshotConcepts snapshotConcepts;
 
@@ -152,7 +156,6 @@ public class StudentRESTController {
 
         tag.setTagName(tagName);
         tagName.addTag(tag);
-
         return tagRepository.saveAndFlush(tag);
     }
 
@@ -173,6 +176,10 @@ public class StudentRESTController {
         tagName.getTags().remove(tag);
         tagRepository.delete(tag);
         if (tagName.getTags().isEmpty()) {
+            for (TagCategory tagcategory : tagName.getTagCategories()) {
+                tagcategory.removeTagName(tagName);
+                tagCategoryRepository.save(tagcategory);
+            }
             tagNameRepository.delete(tagName);
         } else {
             tagNameRepository.save(tagName);
