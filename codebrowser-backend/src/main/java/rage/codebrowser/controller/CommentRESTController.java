@@ -27,11 +27,25 @@ public class CommentRESTController {
     private CommentRepository commentRepository;
 
 
-
     @RequestMapping(value = {"comments"})
     @ResponseBody
     public List<Comment> getComments() {
         return commentRepository.findAll(new Sort(Sort.Direction.DESC, "createdAt"));
+    }
+
+    @RequestMapping(
+            value = {"students/{studentId}/courses/{courseId}/exercises/{exerciseId}/comments"},
+            method = RequestMethod.GET, produces = "application/json")
+    @ResponseBody
+    public List<Comment> getExerciseComments(@PathVariable("studentId") Student student, @PathVariable("courseId") Course course, @PathVariable("exerciseId") Exercise exercise) {
+
+        List<Comment> comments = commentRepository.findByStudentAndCourseAndExercise(student, course, exercise);
+
+        if (comments == null) {
+            comments = new ArrayList<Comment>();
+        }
+
+        return comments;
     }
 
 
@@ -43,7 +57,6 @@ public class CommentRESTController {
     public Comment postExerciseComment(@PathVariable("studentId") Student student, @PathVariable("courseId") Course course, @PathVariable("exerciseId") Exercise exercise, @RequestBody Comment comment) {
         return postSnapshotComment(student, course, exercise, null, comment);
     }
-
 
     @RequestMapping(
             value = {"students/{studentId}/courses/{courseId}/exercises/{exerciseId}/snapshots/{snapshotId}/comments"},
@@ -61,17 +74,49 @@ public class CommentRESTController {
 
 
     @RequestMapping(
-            value = {"students/{studentId}/courses/{courseId}/exercises/{exerciseId}/comments"},
-            method = RequestMethod.GET, produces = "application/json")
+            value = {"students/{studentId}/courses/{courseId}/exercises/{exerciseId}/comments/{commentId}"},
+            method = RequestMethod.DELETE)
     @ResponseBody
-    public List<Comment> getExerciseComments(@PathVariable("studentId") Student student, @PathVariable("courseId") Course course, @PathVariable("exerciseId") Exercise exercise) {
+    public Comment deleteExerciseComment(@PathVariable("studentId") Student student, @PathVariable("courseId") Course course, @PathVariable("exerciseId") Exercise exercise, @PathVariable("commentId") Comment comment) {
+        return deleteComment(comment);
+    }
 
-        List<Comment> comments = commentRepository.findByStudentAndCourseAndExercise(student, course, exercise);
+    @RequestMapping(
+            value = {"students/{studentId}/courses/{courseId}/exercises/{exerciseId}/snapshots/{snapshotId}/comments/{commentId}"},
+            method = RequestMethod.DELETE)
+    @ResponseBody
+    public Comment deleteSnapshotComment(@PathVariable("studentId") Student student, @PathVariable("courseId") Course course, @PathVariable("exerciseId") Exercise exercise, @PathVariable("snapshotId") Snapshot snapshot, @PathVariable("commentId") Comment comment) {
+        return deleteComment(comment);
+    }
 
-        if (comments == null) {
-            comments = new ArrayList<Comment>();
-        }
+    @RequestMapping(value = {"comments/{commentId}"}, method = RequestMethod.DELETE)
+    @ResponseBody
+    public Comment deleteComment(@PathVariable("commentId") Comment comment) {
+        commentRepository.delete(comment);
+        return comment;
+    }
 
-        return comments;
+
+    @RequestMapping(
+            value = {"students/{studentId}/courses/{courseId}/exercises/{exerciseId}/comments/{commentId}"},
+            method = RequestMethod.PUT, consumes = "application/json", produces = "application/json")
+    @ResponseBody
+    public Comment updateExerciseComment(@PathVariable("studentId") Student student, @PathVariable("courseId") Course course, @PathVariable("exerciseId") Exercise exercise, @PathVariable("commentId") Comment comment, @RequestBody Comment updated) {
+        return updateCommentText(comment, updated);
+    }
+
+   @RequestMapping(
+            value = {"students/{studentId}/courses/{courseId}/exercises/{exerciseId}/snapshots/{snapshotId}/comments/{commentId}"},
+            method = RequestMethod.PUT, consumes = "application/json", produces = "application/json")
+    @ResponseBody
+    public Comment updateSnapshotComment(@PathVariable("studentId") Student student, @PathVariable("courseId") Course course, @PathVariable("exerciseId") Exercise exercise, @PathVariable("snapshotId") Snapshot snapshot, @PathVariable("commentId") Comment comment, @RequestBody Comment updated) {
+        return updateCommentText(comment, updated);
+    }
+
+    @RequestMapping(value = {"comments/{commentId}"}, method = RequestMethod.PUT, consumes = "application/json", produces = "application/json")
+    @ResponseBody
+    public Comment updateCommentText(@PathVariable("commentId") Comment oldComment, @RequestBody Comment updatedComment) {
+        oldComment.setComment(updatedComment.getComment());
+        return commentRepository.save(oldComment);
     }
 }
