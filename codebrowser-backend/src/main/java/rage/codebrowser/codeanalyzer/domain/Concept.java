@@ -9,8 +9,6 @@ public class Concept {
         this.name = name;
         this.size = size;
     }
-    
-    
 
     @Override
     public boolean equals(Object other) {
