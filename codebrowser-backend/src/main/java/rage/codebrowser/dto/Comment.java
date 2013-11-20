@@ -4,36 +4,37 @@ package rage.codebrowser.dto;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import java.util.Date;
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.PrePersist;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-import org.springframework.data.jpa.domain.AbstractPersistable;
 
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 @Entity
-public class Comment extends AbstractPersistable {
+public class Comment extends AbstractNamedPersistable {
 
     @JoinColumn
     @ManyToOne
-    @JsonIgnoreProperties({"exercises"})
+    @JsonIgnoreProperties({"course"})
     private Course course;
 
     @JoinColumn
     @ManyToOne
-    @JsonIgnoreProperties({"courses"})
+    @JsonIgnoreProperties({"student"})
     private Student student;
 
     @JoinColumn
     @ManyToOne
+    @JsonIgnoreProperties({"exercise"})
     private Exercise exercise;
 
-    // Null if the tag is not related to specific snapshot
+    // Null if the Comment is not related to specific snapshot
+    @JoinColumn
     @ManyToOne
-    @JsonIgnoreProperties({"files"})
-    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @JsonIgnoreProperties({"snapshot"})
     private Snapshot snapshot;
 
 
@@ -56,6 +57,23 @@ public class Comment extends AbstractPersistable {
     public void setCreatedAt(Date createdAt) {
         this.createdAt = createdAt;
     }
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getComment() {
+        return comment;
+    }
+
+    public void setComment(String comment) {
+        this.comment = comment;
+    }
+
+
 
     public Course getCourse() {
         return course;
@@ -88,21 +106,4 @@ public class Comment extends AbstractPersistable {
     public void setSnapshot(Snapshot snapshot) {
         this.snapshot = snapshot;
     }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public String getComment() {
-        return comment;
-    }
-
-    public void setComment(String comment) {
-        this.comment = comment;
-    }
-
 }
