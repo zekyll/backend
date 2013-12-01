@@ -18,23 +18,22 @@ public class Comment extends AbstractNamedPersistable {
 
     @JoinColumn
     @ManyToOne
-    @JsonIgnoreProperties({"course"})
+    @JsonIgnoreProperties({"exercises"})
     private Course course;
 
     @JoinColumn
     @ManyToOne
-    @JsonIgnoreProperties({"student"})
+    @JsonIgnoreProperties({"courses"})
     private Student student;
 
     @JoinColumn
     @ManyToOne
-    @JsonIgnoreProperties({"exercise"})
     private Exercise exercise;
 
     // Null if the Comment is not related to specific snapshot
     @JoinColumn
     @ManyToOne
-    @JsonIgnoreProperties({"snapshot"})
+    @JsonIgnoreProperties({"files"})
     private Snapshot snapshot;
 
 
