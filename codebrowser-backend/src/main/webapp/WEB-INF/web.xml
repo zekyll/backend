@@ -43,6 +43,10 @@
             <param-name>allowedHeaders</param-name>
             <param-value>x-requested-with,origin,content-type,accept</param-value>
         </init-param>
+        <init-param>
+            <param-name>exposedHeaders</param-name>
+            <param-value>Allow</param-value>
+        </init-param>
     </filter>
     <filter-mapping>
         <filter-name>cors-filter</filter-name>
