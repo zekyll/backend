@@ -1,9 +1,6 @@
 
 package rage.codebrowser.controller;
 
-import java.util.ArrayList;
-import java.util.List;
-import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -17,38 +14,30 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.util.UriComponentsBuilder;
 import rage.codebrowser.dto.Comment;
 import rage.codebrowser.dto.Course;
 import rage.codebrowser.dto.Exercise;
 import rage.codebrowser.dto.Snapshot;
 import rage.codebrowser.dto.Student;
-import rage.codebrowser.errors.ResourceNotFoundException;
 import rage.codebrowser.repository.CommentRepository;
 
 @Controller
 public class CommentRESTController {
 
-
     @Autowired
     private CommentRepository commentRepository;
 
-    @RequestMapping( value = "comments",params = { "page", "size" },method = RequestMethod.GET )
+    @RequestMapping(value = "comments", method = RequestMethod.GET)
     @ResponseBody
-    public Page<Comment> findPaginated(
-     @RequestParam( "page" ) int page, @RequestParam( "size" ) int size){
-       
-       Pageable pageable = new PageRequest(page, size, Sort.Direction.DESC, "createdAt");
-       Page< Comment > resultPage = commentRepository.findAll( pageable );
-       
-       return resultPage;
+    public Page<Comment> findPaginated(@RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "100") int size,
+            @RequestParam(value = "query", required = false) String search) {
+        Pageable pageable = new PageRequest(page, size, Sort.Direction.DESC, "createdAt");
+        if (search == null)
+            return commentRepository.findAll(pageable);
+        else
+            return commentRepository.findByCommentContaining(search.toLowerCase(), pageable);
     }
-
-//    @RequestMapping(value = {"comments"})
-//    @ResponseBody
-//    public List<Comment> getComments() {
-//        return commentRepository.findAll(new Sort(Sort.Direction.DESC, "createdAt"));
-//    }
 
     @RequestMapping(value = {"students/{studentId}/courses/{courseId}/exercises/{exerciseId}/snapshots/{snapshotId}/comments"},
             params = { "page", "size" },method = RequestMethod.GET)
@@ -119,7 +108,7 @@ public class CommentRESTController {
         return updateCommentText(comment, updated);
     }
 
-   @RequestMapping(
+    @RequestMapping(
             value = {"students/{studentId}/courses/{courseId}/exercises/{exerciseId}/snapshots/{snapshotId}/comments/{commentId}"},
             method = RequestMethod.PUT, consumes = "application/json", produces = "application/json")
     @ResponseBody
