@@ -3,15 +3,20 @@ package integration;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.gargoylesoftware.htmlunit.HttpMethod;
 import com.gargoylesoftware.htmlunit.Page;
 import com.gargoylesoftware.htmlunit.WebClient;
+import com.gargoylesoftware.htmlunit.WebRequest;
 import com.gargoylesoftware.htmlunit.WebResponse;
 import java.io.IOException;
+import java.net.URL;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import static org.junit.Assert.*;
 
 public class BaseFetchingTest {
+
+    private static String URL_ROOT = "http://localhost:10377/app/";
 
     private static WebClient client;
 
@@ -27,12 +32,12 @@ public class BaseFetchingTest {
     }
 
     static JsonNode fetchJson(String urlSuffix) throws IOException {
-        Page page = client.getPage("http://localhost:10377/app/" + urlSuffix);
+        Page page = client.getPage(URL_ROOT + urlSuffix);
         WebResponse response = page.getWebResponse();
 
         try {
-            assertEquals("application/json", response.getContentType());
             assertEquals(200, response.getStatusCode());
+            assertEquals("application/json", response.getContentType());
             assertEquals("UTF-8", response.getContentCharset());
             //System.out.println(response.getContentAsString());
             return new ObjectMapper().readTree(response.getContentAsString());
@@ -43,18 +48,56 @@ public class BaseFetchingTest {
     }
 
     static String fetchText(String urlSuffix) throws IOException {
-        Page page = client.getPage("http://localhost:10377/app/" + urlSuffix);
+        Page page = client.getPage(URL_ROOT + urlSuffix);
         WebResponse response = page.getWebResponse();
 
-        assertEquals("text/plain", response.getContentType());
         assertEquals(200, response.getStatusCode());
+        assertEquals("text/plain", response.getContentType());
         assertEquals("UTF-8", response.getContentCharset());
         //System.out.println(response.getContentAsString());
         return response.getContentAsString();
     }
 
+    static JsonNode postJson(String urlSuffix, String requestBody) throws IOException {
+        WebRequest request = new WebRequest(new URL(URL_ROOT + urlSuffix), HttpMethod.POST);
+        request.setRequestBody(requestBody);
+        request.setAdditionalHeader("Content-Type", "application/json");
+
+        Page page = client.getPage(request);
+        WebResponse response = page.getWebResponse();
+
+        try {
+            assertEquals(200, response.getStatusCode());
+            assertEquals("application/json", response.getContentType());
+            assertEquals("UTF-8", response.getContentCharset());
+            //System.out.println(response.getContentAsString());
+            return new ObjectMapper().readTree(response.getContentAsString());
+        } catch (JsonParseException ex) {
+            fail("Response is not json");
+            return null;
+        }
+    }
+
+    static JsonNode sendDeleteRequest(String urlSuffix) throws IOException {
+        WebRequest request = new WebRequest(new URL(URL_ROOT + urlSuffix), HttpMethod.DELETE);
+
+        Page page = client.getPage(request);
+        WebResponse response = page.getWebResponse();
+
+        try {
+            assertEquals(200, response.getStatusCode());
+            assertEquals("application/json", response.getContentType());
+            assertEquals("UTF-8", response.getContentCharset());
+            //System.out.println(response.getContentAsString());
+            return new ObjectMapper().readTree(response.getContentAsString());
+        } catch (JsonParseException ex) {
+            fail("Response is not json");
+            return null;
+        }
+    }
+
     static void testBadRequest(String urlSuffix) throws IOException {
-        Page page = client.getPage("http://localhost:10377/app/" + urlSuffix);
+        Page page = client.getPage(URL_ROOT + urlSuffix);
         assertEquals(400, page.getWebResponse().getStatusCode());
     }
 
@@ -72,15 +115,24 @@ public class BaseFetchingTest {
         return null;
     }
 
-    static void checkIdAndName(JsonNode node, long id, String name) {
-        // id
+    static void checkId(JsonNode node, long id) {
         assertTrue(node.get("id").isIntegralNumber());
         if (id >= 0) {
             assertEquals(id, node.get("id").longValue());
         }
+    }
+
+    static void checkIdAndName(JsonNode node, long id, String name) {
+        // id
+        checkId(node, id);
 
         // name
-        assertEquals(name, node.get("name").textValue());
+        if (name != null) {
+            assertEquals(name, node.get("name").textValue());
+        } else {
+            assertTrue(node.has("name"));
+            assertTrue(node.get("name").isTextual());
+        }
     }
 
     static void checkCourseFields(JsonNode course, long id, String name, int amountOfStudents) {
@@ -140,10 +192,7 @@ public class BaseFetchingTest {
 
     static void checkDiffListFields(JsonNode diffList, long id, int lines, int inserted, int modified, int deleted) {
         // id
-//        assertTrue(diffList.get("id").isIntegralNumber());
-//        if (id >= 0) {
-//            assertEquals(id, diffList.get("id").longValue());
-//        }
+        //checkId(diffList, id);
 
         // lines
         assertTrue(diffList.get("lines").isIntegralNumber());
@@ -168,10 +217,7 @@ public class BaseFetchingTest {
 
     static void checkDiffFields(JsonNode diff, long id, String type, int rowStart, int rowEnd, int offset, int fromRowStart, int fromRowEnd, String lines) {
         // id
-//        assertTrue(diff.get("id").isIntegralNumber());
-//        if (id >= 0) {
-//            assertEquals(id, diff.get("id").longValue());
-//        }
+        //checkId(diff, id);
 
         // type
         assertEquals(type, diff.get("type").textValue());
@@ -219,5 +265,17 @@ public class BaseFetchingTest {
         // size
         assertTrue(concept.has("size"));
         assertTrue(concept.get("size").isNumber());
+    }
+
+    static void checkTagFields(JsonNode tag, long id) {
+        checkId(tag, id);
+    }
+
+    static void checkTagNameFields(JsonNode tag, long id, String name) {
+        checkIdAndName(tag, id, name);
+    }
+
+    static void checkStudentGroupFields(JsonNode studentGroup, long id, String name) {
+        checkIdAndName(studentGroup, id, name);
     }
 }
