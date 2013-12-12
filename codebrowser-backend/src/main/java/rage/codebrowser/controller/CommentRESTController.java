@@ -33,22 +33,24 @@ public class CommentRESTController {
             @RequestParam(value = "size", defaultValue = "100") int size,
             @RequestParam(value = "query", required = false) String search) {
         Pageable pageable = new PageRequest(page, size, Sort.Direction.DESC, "createdAt");
-        if (search == null)
+        if (search == null) {
             return commentRepository.findAll(pageable);
-        else
-            return commentRepository.findByCommentContaining(search.toLowerCase(), pageable);
+        } else {
+            return commentRepository.findCommentsContaining(search.toLowerCase(), pageable);
+        }
     }
 
     @RequestMapping(value = {"students/{studentId}/courses/{courseId}/exercises/{exerciseId}/snapshots/{snapshotId}/comments"},
-            params = { "page", "size" },method = RequestMethod.GET)
+            method = RequestMethod.GET)
     @ResponseBody
     public Page<Comment> getExerciseComments(@PathVariable("studentId") Student student, @PathVariable("courseId") Course course, @PathVariable("exerciseId") Exercise exercise, @PathVariable("snapshotId") Snapshot snapshot,
-                                                @RequestParam( "page" ) int page, @RequestParam( "size" ) int size) {
-
+            @RequestParam(value = "page", defaultValue = "0") int page, @RequestParam(value = "size", defaultValue = "100") int size, @RequestParam(value = "query", required = false) String search) {
         Pageable pageable = new PageRequest(page, size, Sort.Direction.DESC, "createdAt");
-        Page<Comment> comments = commentRepository.findByStudentAndCourseAndExerciseAndSnapshotOrSnapshotIsNull(student, course, exercise, snapshot, pageable);
-
-        return comments;
+        if (search == null) {
+            return commentRepository.findSolutionComments(student, course, exercise, snapshot, pageable);
+        } else {
+            return commentRepository.findSolutionCommentsContaining(student, course, exercise, snapshot, search, pageable);
+        }
     }
 
 
